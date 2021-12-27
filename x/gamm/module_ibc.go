@@ -182,62 +182,8 @@ func (am AppModule) OnAcknowledgementPacket(
 	acknowledgement []byte,
 	relayer sdk.AccAddress,
 ) (*sdk.Result, error) {
-	var ack channeltypes.Acknowledgement
-	if err := types.ModuleCdc.UnmarshalJSON(acknowledgement, &ack); err != nil {
-		return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal packet acknowledgement: %v", err)
-	}
-
-	// this line is used by starport scaffolding # oracle/packet/module/ack
-
-	var modulePacketData types.GammPacketData
-	if err := modulePacketData.Unmarshal(modulePacket.GetData()); err != nil {
-		return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal packet data: %s", err.Error())
-	}
-
-	var eventType string
-
-	// Dispatch packet
-	switch packet := modulePacketData.Packet.(type) {
-	case *types.GammPacketData_SpotPricePacket:
-		err := am.keeper.OnAcknowledgementSpotPricePacket(ctx, modulePacket, *packet.SpotPricePacket, ack)
-		if err != nil {
-			return nil, err
-		}
-		eventType = types.EventTypeSpotPricePacket
-		// this line is used by starport scaffolding # ibc/packet/module/ack
-	default:
-		errMsg := fmt.Sprintf("unrecognized %s packet type: %T", types.ModuleName, packet)
-		return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
-	}
-
-	ctx.EventManager().EmitEvent(
-		sdk.NewEvent(
-			eventType,
-			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-			sdk.NewAttribute(types.AttributeKeyAck, fmt.Sprintf("%v", ack)),
-		),
-	)
-
-	switch resp := ack.Response.(type) {
-	case *channeltypes.Acknowledgement_Result:
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				eventType,
-				sdk.NewAttribute(types.AttributeKeyAckSuccess, string(resp.Result)),
-			),
-		)
-	case *channeltypes.Acknowledgement_Error:
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				eventType,
-				sdk.NewAttribute(types.AttributeKeyAckError, resp.Error),
-			),
-		)
-	}
-
-	return &sdk.Result{
-		Events: ctx.EventManager().Events().ToABCIEvents(),
-	}, nil
+	errMsg := fmt.Sprintf("cannot cause a packet ack, module %s does not send a packet over the channel", types.ModuleName)
+	return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
 }
 
 // OnTimeoutPacket implements the IBCModule interface
@@ -246,25 +192,6 @@ func (am AppModule) OnTimeoutPacket(
 	modulePacket channeltypes.Packet,
 	relayer sdk.AccAddress,
 ) (*sdk.Result, error) {
-	var modulePacketData types.GammPacketData
-	if err := modulePacketData.Unmarshal(modulePacket.GetData()); err != nil {
-		return nil, sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal packet data: %s", err.Error())
-	}
-
-	// Dispatch packet
-	switch packet := modulePacketData.Packet.(type) {
-	case *types.GammPacketData_SpotPricePacket:
-		err := am.keeper.OnTimeoutSpotPricePacket(ctx, modulePacket, *packet.SpotPricePacket)
-		if err != nil {
-			return nil, err
-		}
-		// this line is used by starport scaffolding # ibc/packet/module/timeout
-	default:
-		errMsg := fmt.Sprintf("unrecognized %s packet type: %T", types.ModuleName, packet)
-		return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
-	}
-
-	return &sdk.Result{
-		Events: ctx.EventManager().Events().ToABCIEvents(),
-	}, nil
+	errMsg := fmt.Sprintf("cannot cause a packet timeout, module %s does not send a packet over the channel", types.ModuleName)
+	return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
 }
