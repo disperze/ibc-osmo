@@ -1,7 +1,7 @@
 package types
 
 import (
-	host "github.com/cosmos/ibc-go/modules/core/24-host"
+	host "github.com/cosmos/ibc-go/v2/modules/core/24-host"
 )
 
 // DefaultIndex is the default capability global index

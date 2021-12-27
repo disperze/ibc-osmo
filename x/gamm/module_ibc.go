@@ -6,10 +6,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
-	channeltypes "github.com/cosmos/ibc-go/modules/core/04-channel/types"
-	porttypes "github.com/cosmos/ibc-go/modules/core/05-port/types"
-	host "github.com/cosmos/ibc-go/modules/core/24-host"
-	ibcexported "github.com/cosmos/ibc-go/modules/core/exported"
+	channeltypes "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
+	porttypes "github.com/cosmos/ibc-go/v2/modules/core/05-port/types"
+	host "github.com/cosmos/ibc-go/v2/modules/core/24-host"
+	ibcexported "github.com/cosmos/ibc-go/v2/modules/core/exported"
 	"github.com/disperze/ibc-osmo/x/gamm/types"
 )
 
@@ -181,9 +181,9 @@ func (am AppModule) OnAcknowledgementPacket(
 	modulePacket channeltypes.Packet,
 	acknowledgement []byte,
 	relayer sdk.AccAddress,
-) (*sdk.Result, error) {
+) error {
 	errMsg := fmt.Sprintf("cannot cause a packet ack, module %s does not send a packet over the channel", types.ModuleName)
-	return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
+	return sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
 }
 
 // OnTimeoutPacket implements the IBCModule interface
@@ -191,7 +191,19 @@ func (am AppModule) OnTimeoutPacket(
 	ctx sdk.Context,
 	modulePacket channeltypes.Packet,
 	relayer sdk.AccAddress,
-) (*sdk.Result, error) {
+) error {
 	errMsg := fmt.Sprintf("cannot cause a packet timeout, module %s does not send a packet over the channel", types.ModuleName)
-	return nil, sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
+	return sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
+}
+
+// NegotiateAppVersion implements the IBCModule interface
+func (am AppModule) NegotiateAppVersion(
+	ctx sdk.Context,
+	order channeltypes.Order,
+	connectionID string,
+	portID string,
+	counterparty channeltypes.Counterparty,
+	proposedVersion string,
+) (version string, err error) {
+	return proposedVersion, nil
 }
