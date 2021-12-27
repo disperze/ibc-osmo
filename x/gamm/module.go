@@ -104,12 +104,10 @@ type AppModule struct {
 }
 
 func NewAppModule(
-	cdc codec.Codec,
 	keeper keeper.Keeper,
 ) AppModule {
 	return AppModule{
-		AppModuleBasic: NewAppModuleBasic(cdc),
-		keeper:         keeper,
+		keeper: keeper,
 	}
 }
 
