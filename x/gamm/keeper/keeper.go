@@ -17,6 +17,8 @@ type (
 		cdc      codec.BinaryCodec
 		storeKey sdk.StoreKey
 		memKey   sdk.StoreKey
+
+		gammKeeper types.GammKeeper
 	}
 )
 
@@ -27,6 +29,7 @@ func NewKeeper(
 	channelKeeper ibckeeper.ChannelKeeper,
 	portKeeper ibckeeper.PortKeeper,
 	scopedKeeper ibckeeper.ScopedKeeper,
+	gammKeeper types.GammKeeper,
 ) *Keeper {
 	return &Keeper{
 		Keeper: ibckeeper.NewKeeper(
@@ -36,9 +39,10 @@ func NewKeeper(
 			portKeeper,
 			scopedKeeper,
 		),
-		cdc:      cdc,
-		storeKey: storeKey,
-		memKey:   memKey,
+		cdc:        cdc,
+		storeKey:   storeKey,
+		memKey:     memKey,
+		gammKeeper: gammKeeper,
 	}
 }
 

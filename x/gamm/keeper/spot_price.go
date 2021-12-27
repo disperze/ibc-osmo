@@ -15,7 +15,12 @@ func (k Keeper) OnRecvSpotPricePacket(ctx sdk.Context, packet channeltypes.Packe
 		return packetAck, err
 	}
 
-	// TODO: packet reception logic
+	price, err := k.gammKeeper.CalculateSpotPrice(ctx, data.PoolId, data.TokenIn, data.TokenOut)
+	if err != nil {
+		return packetAck, err
+	}
+
+	packetAck.Price = price.String()
 
 	return packetAck, nil
 }

@@ -1,18 +1,17 @@
 package types
 
+import "fmt"
+
 // ValidateBasic is used for validating the packet
 func (p SpotPricePacketData) ValidateBasic() error {
 
-	// TODO: Validate the packet data
+	if p.TokenIn == "" {
+		return fmt.Errorf("invalid token in denom")
+	}
+
+	if p.TokenOut == "" {
+		return fmt.Errorf("invalid token out denom")
+	}
 
 	return nil
-}
-
-// GetBytes is a helper for serialising
-func (p SpotPricePacketData) GetBytes() ([]byte, error) {
-	var modulePacket GammPacketData
-
-	modulePacket.Packet = &GammPacketData_SpotPricePacket{&p}
-
-	return modulePacket.Marshal()
 }
