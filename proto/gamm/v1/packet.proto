@@ -1,0 +1,26 @@
+syntax = "proto3";
+package disperze.ibcosmo.v1.gamm;
+
+option go_package = "github.com/disperze/ibc-osmo/x/gamm/types";
+
+message GammPacketData {
+    oneof packet {
+        NoData noData = 1;
+				SpotPricePacketData spotPricePacket = 2;
+    }
+}
+
+message NoData {
+}
+
+// SpotPricePacketData defines a struct for the packet payload
+message SpotPricePacketData {
+  uint64 pool_id = 1;
+  string token_in = 2;
+  string token_out = 3;
+}
+
+// SpotPricePacketAck defines a struct for the packet acknowledgment
+message SpotPricePacketAck {
+	  string price = 1;
+}

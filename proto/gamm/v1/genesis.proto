@@ -1,0 +1,11 @@
+syntax = "proto3";
+package disperze.ibcosmo.v1.gamm;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/disperze/ibc-osmo/x/gamm/types";
+
+// GenesisState defines the gamm module's genesis state.
+message GenesisState {
+  string port_id = 2;
+}
