@@ -146,8 +146,8 @@ func (am AppModule) OnRecvPacket(
 
 	// Dispatch packet
 	switch packet := modulePacketData.Packet.(type) {
-	case *types.GammPacketData_SpotPricePacket:
-		packetAck, err := am.keeper.OnRecvSpotPricePacket(ctx, modulePacket, *packet.SpotPricePacket)
+	case *types.GammPacketData_SpotPrice:
+		packetAck, err := am.keeper.OnRecvSpotPricePacket(ctx, modulePacket, *packet.SpotPrice)
 		if err != nil {
 			ack = channeltypes.NewErrorAcknowledgement(err.Error())
 		} else {

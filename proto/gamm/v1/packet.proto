@@ -6,7 +6,7 @@ option go_package = "github.com/disperze/ibc-osmo/x/gamm/types";
 message GammPacketData {
     oneof packet {
         NoData noData = 1;
-				SpotPricePacketData spotPricePacket = 2;
+				SpotPricePacketData spot_price = 2;
     }
 }
 
