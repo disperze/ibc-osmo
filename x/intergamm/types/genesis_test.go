@@ -3,7 +3,7 @@ package types_test
 import (
 	"testing"
 
-	"github.com/disperze/ibc-osmo/x/gamm/types"
+	"github.com/disperze/ibc-osmo/x/intergamm/types"
 	"github.com/stretchr/testify/require"
 )
 

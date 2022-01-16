@@ -1,4 +1,4 @@
-package gamm
+package intergamm
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	porttypes "github.com/cosmos/ibc-go/v2/modules/core/05-port/types"
 	host "github.com/cosmos/ibc-go/v2/modules/core/24-host"
 	ibcexported "github.com/cosmos/ibc-go/v2/modules/core/exported"
-	"github.com/disperze/ibc-osmo/x/gamm/types"
+	"github.com/disperze/ibc-osmo/x/intergamm/types"
 )
 
 // OnChanOpenInit implements the IBCModule interface

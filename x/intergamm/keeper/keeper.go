@@ -8,13 +8,12 @@ import (
 	channeltypes "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
 	host "github.com/cosmos/ibc-go/v2/modules/core/24-host"
 
-	"github.com/disperze/ibc-osmo/x/gamm/types"
+	"github.com/disperze/ibc-osmo/x/intergamm/types"
 )
 
 type Keeper struct {
 	cdc      codec.BinaryCodec
 	storeKey sdk.StoreKey
-	memKey   sdk.StoreKey
 
 	channelKeeper types.ChannelKeeper
 	portKeeper    types.PortKeeper

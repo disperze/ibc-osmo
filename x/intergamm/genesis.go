@@ -1,9 +1,9 @@
-package gamm
+package intergamm
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/disperze/ibc-osmo/x/gamm/keeper"
-	"github.com/disperze/ibc-osmo/x/gamm/types"
+	"github.com/disperze/ibc-osmo/x/intergamm/keeper"
+	"github.com/disperze/ibc-osmo/x/intergamm/types"
 )
 
 // InitGenesis initializes the capability module's state from a provided genesis

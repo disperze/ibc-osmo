@@ -1,4 +1,4 @@
-package gamm
+package intergamm
 
 import (
 	"encoding/json"
@@ -18,8 +18,8 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	porttypes "github.com/cosmos/ibc-go/v2/modules/core/05-port/types"
-	"github.com/disperze/ibc-osmo/x/gamm/keeper"
-	"github.com/disperze/ibc-osmo/x/gamm/types"
+	"github.com/disperze/ibc-osmo/x/intergamm/keeper"
+	"github.com/disperze/ibc-osmo/x/intergamm/types"
 )
 
 var (
