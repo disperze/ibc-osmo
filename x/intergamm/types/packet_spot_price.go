@@ -1,6 +1,23 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
+
+// NewSpotPricePacketData contructs a new GammPacketData instance
+func NewSpotPricePacketData(poolID uint64, tokenIn, tokenOut string) GammPacketData {
+	return GammPacketData{
+		Packet: &GammPacketData_SpotPrice{
+			SpotPrice: &SpotPricePacketData{
+				PoolId:   poolID,
+				TokenIn:  tokenIn,
+				TokenOut: tokenOut,
+			},
+		},
+	}
+}
 
 // ValidateBasic is used for validating the packet
 func (p SpotPricePacketData) ValidateBasic() error {
@@ -14,4 +31,9 @@ func (p SpotPricePacketData) ValidateBasic() error {
 	}
 
 	return nil
+}
+
+// GetBytes is a helper for serialising
+func (gpd GammPacketData) GetBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&gpd))
 }
