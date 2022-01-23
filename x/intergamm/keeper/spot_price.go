@@ -13,7 +13,7 @@ func (k Keeper) OnRecvSpotPricePacket(ctx sdk.Context, packet channeltypes.Packe
 		return packetAck, err
 	}
 
-	price, err := k.gammKeeper.CalculateSpotPrice(ctx, data.PoolId, data.TokenIn, data.TokenOut)
+	price, err := k.gammKeeper.CalculateSpotPrice(ctx, data.PoolID, data.TokenIn, data.TokenOut)
 	if err != nil {
 		return packetAck, err
 	}

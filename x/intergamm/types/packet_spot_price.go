@@ -7,11 +7,12 @@ import (
 )
 
 // NewSpotPricePacketData contructs a new GammPacketData instance
-func NewSpotPricePacketData(poolID uint64, tokenIn, tokenOut string) GammPacketData {
+func NewSpotPricePacketData(clientID string, poolID uint64, tokenIn, tokenOut string) GammPacketData {
 	return GammPacketData{
 		Packet: &GammPacketData_SpotPrice{
 			SpotPrice: &SpotPricePacketData{
-				PoolId:   poolID,
+				ClientID: clientID,
+				PoolID:   poolID,
 				TokenIn:  tokenIn,
 				TokenOut: tokenOut,
 			},

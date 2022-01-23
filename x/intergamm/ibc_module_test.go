@@ -59,13 +59,13 @@ func (suite *GammTestSuite) TestOnRecvPacket() {
 		},
 		{
 			"ack - invalid denom a", func() {
-				spotPricePacket := types.NewSpotPricePacketData(1, "", "uion")
+				spotPricePacket := types.NewSpotPricePacketData("ID321", 1, "", "uion")
 				packetData = spotPricePacket.GetBytes()
 			}, false,
 		},
 		{
 			"ack - invalid denom b", func() {
-				spotPricePacket := types.NewSpotPricePacketData(1, "uosmo", "")
+				spotPricePacket := types.NewSpotPricePacketData("", 1, "uosmo", "")
 				packetData = spotPricePacket.GetBytes()
 			}, false,
 		},
@@ -87,7 +87,7 @@ func (suite *GammTestSuite) TestOnRecvPacket() {
 			timeoutHeight := clienttypes.NewHeight(0, 100)
 			seq := uint64(1)
 
-			spotPricePacket := types.NewSpotPricePacketData(1, "uosmo", "uion")
+			spotPricePacket := types.NewSpotPricePacketData("juno1q4aw0vtcr4jdj70g", 1, "uosmo", "uion")
 			packetData = spotPricePacket.GetBytes()
 
 			tc.malleate()

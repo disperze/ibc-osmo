@@ -1,6 +1,8 @@
 syntax = "proto3";
 package ibcosmo.intergamm.v1beta1;
 
+import "gogoproto/gogo.proto";
+
 option go_package = "github.com/disperze/ibc-osmo/x/intergamm/types";
 
 message GammPacketData {
@@ -15,9 +17,10 @@ message NoData {
 
 // SpotPricePacketData defines a struct for the packet payload
 message SpotPricePacketData {
-  uint64 pool_id = 1;
-  string token_in = 2;
-  string token_out = 3;
+  string client_id = 1 [ (gogoproto.customname) = "ClientID" ];
+  uint64 pool_id = 2 [ (gogoproto.customname) = "PoolID" ];
+  string token_in = 3;
+  string token_out = 4;
 }
 
 // SpotPricePacketAck defines a struct for the packet acknowledgment
