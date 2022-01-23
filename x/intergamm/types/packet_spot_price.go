@@ -11,7 +11,7 @@ func NewSpotPricePacketData(poolID uint64, tokenIn, tokenOut string) GammPacketD
 	return GammPacketData{
 		Packet: &GammPacketData_SpotPrice{
 			SpotPrice: &SpotPricePacketData{
-				PoolId:   poolID,
+				PoolID:   poolID,
 				TokenIn:  tokenIn,
 				TokenOut: tokenOut,
 			},

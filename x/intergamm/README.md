@@ -8,11 +8,12 @@ IBC Implementation for osmosis `x/gamm` module.
 
 Data packet sent by a blockchain to Osmosis chain to query the spot price of a pool asset. It contains the following parameters:
 
-| Parameter      | Type      |
-| -------------- | --------- |
-| PoolID         | unit64    |
-| TokenIn        | string    |                                              
-| TokenOut       | string    |                         
+| Parameter      | Type      |              Description                   |
+| -------------- | --------- | ------------------------------------------ |
+| ClientID       | string    | Unique identifier specified by the client. |
+| PoolID         | unit64    | Pool asset ID                              |
+| TokenIn        | string    | Token In denom                             |                          
+| TokenOut       | string    | Token Out denom                            |               
 
 ### SpotPricePacketAck
 
