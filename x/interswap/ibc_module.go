@@ -112,7 +112,7 @@ func (am AppModule) OnRecvPacket(
 	var ack channeltypes.Acknowledgement
 	switch packetData := modulePacketData.Gamm.Packet.(type) {
 	case *types.GammPacketData_Swap:
-		packetAck, err := am.keeper.OnRecvSwapPacket(ctx, packet, receiver, *packetData.Swap)
+		packetAck, err := am.keeper.OnRecvSwapPacket(ctx, packet, receiver, newData.Amount, newData.Denom, *packetData.Swap)
 		if err != nil {
 			ack = channeltypes.NewErrorAcknowledgement(err.Error())
 		} else {
