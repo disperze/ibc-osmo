@@ -11,6 +11,8 @@ type Keeper struct {
 	cdc      codec.BinaryCodec
 	storeKey sdk.StoreKey
 
+	transferKeeper types.TransferKeeper
+
 	authKeeper types.AccountKeeper
 	gammKeeper types.GammKeeper
 }
@@ -18,17 +20,19 @@ type Keeper struct {
 func NewKeeper(
 	cdc codec.BinaryCodec,
 	storeKey sdk.StoreKey,
+	transferKeeper types.TransferKeeper,
 	authKeeper types.AccountKeeper,
 	gammKeeper types.GammKeeper,
 ) Keeper {
 	return Keeper{
-		cdc:        cdc,
-		storeKey:   storeKey,
-		authKeeper: authKeeper,
-		gammKeeper: gammKeeper,
+		cdc:            cdc,
+		storeKey:       storeKey,
+		transferKeeper: transferKeeper,
+		authKeeper:     authKeeper,
+		gammKeeper:     gammKeeper,
 	}
 }
 
-func (k Keeper) GetSwapAddress() sdk.Address {
+func (k Keeper) GetSwapAddress() sdk.AccAddress {
 	return k.authKeeper.GetModuleAddress(types.ModuleName)
 }
