@@ -46,3 +46,13 @@ func (p SwapExactAmountInPacketData) ValidateBasic() error {
 func (gpd GammPacketData) GetBytes() []byte {
 	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&gpd))
 }
+
+// GetBytes is a helper for serialising
+func (gpd GammPacketData) GetSafeBytes() ([]byte, error) {
+	bz, err := ModuleCdc.MarshalJSON(&gpd)
+	if err != nil {
+		return nil, err
+	}
+
+	return sdk.SortJSON(bz)
+}

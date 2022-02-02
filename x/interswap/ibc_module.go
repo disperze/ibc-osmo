@@ -97,7 +97,7 @@ func (am AppModule) OnRecvPacket(
 	receiver := am.keeper.GetSwapAddress()
 	newData := modulePacketData
 	newData.Receiver = receiver.String()
-	bz, err := types.ModuleCdc.MarshalJSON(&newData)
+	bz, err := newData.Gamm.GetSafeBytes()
 	if err != nil {
 		return channeltypes.NewErrorAcknowledgement(err.Error())
 	}
@@ -112,7 +112,7 @@ func (am AppModule) OnRecvPacket(
 	var ack channeltypes.Acknowledgement
 	switch packetData := modulePacketData.Gamm.Packet.(type) {
 	case *types.GammPacketData_Swap:
-		packetAck, err := am.keeper.OnRecvSwapPacket(ctx, packet, *packetData.Swap)
+		packetAck, err := am.keeper.OnRecvSwapPacket(ctx, packet, receiver, *packetData.Swap)
 		if err != nil {
 			ack = channeltypes.NewErrorAcknowledgement(err.Error())
 		} else {
