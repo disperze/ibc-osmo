@@ -85,18 +85,28 @@ func (am AppModule) OnRecvPacket(
 	packet channeltypes.Packet,
 	relayer sdk.AccAddress,
 ) ibcexported.Acknowledgement {
-	ackIcs20 := am.app.OnRecvPacket(ctx, packet, relayer)
-	if !ackIcs20.Success() {
-		return ackIcs20
-	}
-
 	var modulePacketData types.IbcPacketData
 	if err := types.ModuleCdc.UnmarshalJSON(packet.GetData(), &modulePacketData); err != nil {
 		return channeltypes.NewErrorAcknowledgement(sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal packet data: %s", err.Error()).Error())
 	}
 
 	if modulePacketData.Gamm == nil {
-		return ackIcs20
+		return am.app.OnRecvPacket(ctx, packet, relayer)
+	}
+
+	receiver := am.keeper.GetSwapAddress()
+	newData := modulePacketData
+	newData.Receiver = receiver.String()
+	bz, err := types.ModuleCdc.MarshalJSON(&newData)
+	if err != nil {
+		return channeltypes.NewErrorAcknowledgement(err.Error())
+	}
+
+	newPacket := packet
+	newPacket.Data = bz
+	ics20Ack := am.app.OnRecvPacket(ctx, packet, relayer)
+	if !ics20Ack.Success() {
+		return ics20Ack
 	}
 
 	var ack channeltypes.Acknowledgement
