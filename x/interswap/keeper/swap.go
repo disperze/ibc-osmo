@@ -18,28 +18,14 @@ func (k Keeper) OnRecvSwapPacket(ctx sdk.Context, packet channeltypes.Packet, se
 
 	// skip error, validate in transferkeeper Rcv
 	tokenIn, _ := types.ParseTokenOnRcv(packet.GetDestPort(), packet.GetDestChannel(), amount, denom)
-	var tokenOutAmount sdk.Int
-	var tokenOutDenom string
-	for i, route := range data.Routes {
-		_outMinAmount := sdk.NewInt(1)
-		if len(data.Routes)-1 == i {
-			_outMinAmount = data.TokenOutMinAmount
-		}
 
-		tokenOutDenom = route.TokenOutDenom
-		tokenOutAmount, _, err = k.gammKeeper.SwapExactAmountIn(ctx, sender, route.PoolId, tokenIn, tokenOutDenom, _outMinAmount)
-		if err != nil {
-			break
-		}
-		tokenIn = sdk.NewCoin(tokenOutDenom, tokenOutAmount)
-	}
-
+	// Swap tokens
+	tokenOutAmount, tokenOutDenom, err := k.MultihopSwapExactAmountIn(ctx, sender, data.Routes, tokenIn, data.TokenOutMinAmount)
 	if err != nil {
 		return packetAck, err
 	}
 
-	// Send swap output to source chain
-
+	// Send tokens output to source chain
 	tokenTransferOut := sdk.NewCoin(tokenOutDenom, tokenOutAmount)
 	// transferKeeper needs ICS4Wrapper
 	err = k.transferKeeper.SendTransfer(ctx, packet.GetDestPort(), packet.GetDestChannel(), tokenTransferOut, sender, data.Sender, clienttypes.ZeroHeight(), 0)
@@ -56,6 +42,29 @@ func (k Keeper) OnRecvSwapPacket(ctx sdk.Context, packet channeltypes.Packet, se
 	packetAck.Denom = denomPathOut
 
 	return packetAck, nil
+}
+
+func (k Keeper) MultihopSwapExactAmountIn(
+	ctx sdk.Context,
+	sender sdk.AccAddress,
+	routes []types.SwapAmountInRoute,
+	tokenIn sdk.Coin,
+	tokenOutMinAmount sdk.Int,
+) (tokenOutAmount sdk.Int, tokenOutDenom string, err error) {
+	for i, route := range routes {
+		_outMinAmount := sdk.NewInt(1)
+		if len(routes)-1 == i {
+			_outMinAmount = tokenOutMinAmount
+		}
+
+		tokenOutAmount, _, err = k.gammKeeper.SwapExactAmountIn(ctx, sender, route.PoolId, tokenIn, route.TokenOutDenom, _outMinAmount)
+		if err != nil {
+			return sdk.Int{}, "", err
+		}
+		tokenIn = sdk.NewCoin(route.TokenOutDenom, tokenOutAmount)
+		tokenOutDenom = route.TokenOutDenom
+	}
+	return
 }
 
 func (k Keeper) getOutDenomPath(ctx sdk.Context, denom string) (string, error) {
