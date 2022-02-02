@@ -100,6 +100,10 @@ import (
 	ibcgammkeeper "github.com/disperze/ibc-osmo/x/intergamm/keeper"
 	ibcgammtypes "github.com/disperze/ibc-osmo/x/intergamm/types"
 
+	ibcswap "github.com/disperze/ibc-osmo/x/interswap"
+	ibcswapkeeper "github.com/disperze/ibc-osmo/x/interswap/keeper"
+	ibcswaptypes "github.com/disperze/ibc-osmo/x/interswap/types"
+
 	// unnamed import of statik for swagger UI support
 	_ "github.com/cosmos/cosmos-sdk/client/docs/statik"
 
@@ -139,6 +143,7 @@ var (
 		authzmodule.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		ibcgamm.AppModuleBasic{},
+		ibcswap.AppModuleBasic{},
 	)
 
 	// module account permissions
@@ -191,6 +196,7 @@ type SimApp struct {
 	EvidenceKeeper   evidencekeeper.Keeper
 	TransferKeeper   ibctransferkeeper.Keeper
 	FeeGrantKeeper   feegrantkeeper.Keeper
+	IbcSwapKeeper    ibcswapkeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
@@ -240,7 +246,7 @@ func NewSimApp(
 		minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey, feegrant.StoreKey,
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
-		authzkeeper.StoreKey, ibcgammtypes.ModuleName,
+		authzkeeper.StoreKey, ibcgammtypes.StoreKey, ibcswaptypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -326,10 +332,11 @@ func NewSimApp(
 		&stakingKeeper, govRouter,
 	)
 
+	ics4Wrapper := ibcswapkeeper.NewSwapICS4Wrapper(app.IBCKeeper.ChannelKeeper, &app.IbcSwapKeeper)
 	// Create Transfer Keepers
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
 		appCodec, keys[ibctransfertypes.StoreKey], app.GetSubspace(ibctransfertypes.ModuleName),
-		app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper,
+		ics4Wrapper, &app.IBCKeeper.PortKeeper,
 		app.AccountKeeper, app.BankKeeper, scopedTransferKeeper,
 	)
 	transferModule := transfer.NewAppModule(app.TransferKeeper)
@@ -340,13 +347,16 @@ func NewSimApp(
 	)
 	ibcGammModule := ibcgamm.NewAppModule(app.IbcGammKeeper)
 
+	app.IbcSwapKeeper = ibcswapkeeper.NewKeeper(appCodec, keys[ibcswaptypes.StoreKey], app.TransferKeeper, app.AccountKeeper, NewSwapKeeperTest())
+	swapModule := ibcswap.NewAppModule(app.IbcSwapKeeper, transferModule)
+
 	// NOTE: the IBC mock keeper and application module is used only for testing core IBC. Do
 	// note replicate if you do not need to test core IBC or light clients.
 	mockModule := ibcmock.NewAppModule(scopedIBCMockKeeper, &app.IBCKeeper.PortKeeper)
 
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
-	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferModule)
+	ibcRouter.AddRoute(ibctransfertypes.ModuleName, swapModule)
 	ibcRouter.AddRoute(ibcmock.ModuleName, mockModule)
 	ibcRouter.AddRoute(ibcgammtypes.ModuleName, ibcGammModule)
 	app.IBCKeeper.SetRouter(ibcRouter)
@@ -412,7 +422,7 @@ func NewSimApp(
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName, stakingtypes.ModuleName,
 		slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName, crisistypes.ModuleName,
 		ibchost.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName, authz.ModuleName, ibctransfertypes.ModuleName,
-		ibcmock.ModuleName, feegrant.ModuleName, ibcgammtypes.ModuleName,
+		ibcmock.ModuleName, feegrant.ModuleName, ibcgammtypes.ModuleName, ibcswaptypes.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
