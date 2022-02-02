@@ -7,13 +7,12 @@ import (
 )
 
 // NewSwapGammPacket contructs a new GammPacketData instance
-func NewSwapGammPacket(sender string, routes []SwapAmountInRoute, tokenIn sdk.Coin, tokenOut sdk.Int) GammPacketData {
+func NewSwapGammPacket(sender string, routes []SwapAmountInRoute, tokenOut sdk.Int) GammPacketData {
 	return GammPacketData{
 		Packet: &GammPacketData_Swap{
 			Swap: &SwapExactAmountInPacketData{
 				Sender:            sender,
 				Routes:            routes,
-				TokenIn:           tokenIn,
 				TokenOutMinAmount: tokenOut,
 			},
 		},
@@ -29,10 +28,6 @@ func (p SwapExactAmountInPacketData) ValidateBasic() error {
 
 	if len(p.Routes) == 0 {
 		return fmt.Errorf("invalid routes")
-	}
-
-	if !p.TokenIn.IsPositive() {
-		return fmt.Errorf("invalid token in")
 	}
 
 	if !p.TokenOutMinAmount.IsPositive() {

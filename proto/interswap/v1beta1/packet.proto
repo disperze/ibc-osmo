@@ -3,7 +3,6 @@ syntax = "proto3";
 package ibcosmo.interswap.v1beta1;
 
 import "gogoproto/gogo.proto";
-import "cosmos/base/v1beta1/coin.proto";
 import "ibc/applications/transfer/v2/packet.proto";
 
 option go_package = "github.com/disperze/ibc-osmo/x/interswap/types";
@@ -32,8 +31,7 @@ message SwapAmountInRoute {
 message SwapExactAmountInPacketData {
   string sender = 1;
   repeated SwapAmountInRoute routes = 2 [ (gogoproto.nullable) = false ];
-  cosmos.base.v1beta1.Coin token_in = 3 [(gogoproto.nullable) = false];
-  string token_out_min_amount = 4 [
+  string token_out_min_amount = 3 [
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
@@ -42,5 +40,5 @@ message SwapExactAmountInPacketData {
 // SwapExactAmountInAck defines a struct for the swap packet acknowledgment
 message SwapExactAmountInAck {
 	string denom = 1;
-    string amount = 2;
+  string amount = 2;
 }
