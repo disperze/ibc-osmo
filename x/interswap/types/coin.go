@@ -20,10 +20,7 @@ func ParseDenonOnRcv(sourcePort, sourceChannel, denom string) string {
 		return unprefixedDenom
 	}
 
-	sourcePrefix := transfertypes.GetDenomPrefix(sourcePort, sourceChannel)
-	// NOTE: sourcePrefix contains the trailing "/"
-	prefixedDenom := sourcePrefix + denom
-
+	prefixedDenom := transfertypes.GetPrefixedDenom(sourcePort, sourceChannel, denom)
 	denomTrace := transfertypes.ParseDenomTrace(prefixedDenom)
 
 	return denomTrace.IBCDenom()

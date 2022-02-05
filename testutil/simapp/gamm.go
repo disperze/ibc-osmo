@@ -33,5 +33,5 @@ func (s SwapKeeperTest) SwapExactAmountIn(
 	tokenOutDenom string,
 	tokenOutMinAmount sdk.Int,
 ) (tokenOutAmount sdk.Int, spotPriceAfter sdk.Dec, err error) {
-	return sdk.NewInt(1), sdk.NewDec(1), nil
+	return tokenIn.Amount, sdk.OneDec(), nil
 }
