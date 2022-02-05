@@ -6,7 +6,6 @@ package types
 import (
 	fmt "fmt"
 	github_com_cosmos_cosmos_sdk_types "github.com/cosmos/cosmos-sdk/types"
-	types "github.com/cosmos/ibc-go/v2/modules/apps/transfer/types"
 	_ "github.com/gogo/protobuf/gogoproto"
 	proto "github.com/gogo/protobuf/proto"
 	io "io"
@@ -26,8 +25,20 @@ var _ = math.Inf
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
 type IbcPacketData struct {
-	*types.FungibleTokenPacketData `protobuf:"bytes,1,opt,name=fungible_token,json=fungibleToken,proto3,embedded=fungible_token" json:""`
-	Gamm                           *GammPacketData `protobuf:"bytes,2,opt,name=gamm,proto3" json:"gamm,omitempty"`
+	// the token denomination to be transferred
+	Denom string `protobuf:"bytes,1,opt,name=denom,proto3" json:"denom,omitempty"`
+	// the token amount to be transferred
+	Amount string `protobuf:"bytes,2,opt,name=amount,proto3" json:"amount,omitempty"`
+	// the sender address
+	Sender string `protobuf:"bytes,3,opt,name=sender,proto3" json:"sender,omitempty"`
+	// the recipient address on the destination chain
+	Receiver string `protobuf:"bytes,4,opt,name=receiver,proto3" json:"receiver,omitempty"`
+	// the gamm action
+	//
+	// Types that are valid to be assigned to Gamm:
+	//	*IbcPacketData_NoData
+	//	*IbcPacketData_Swap
+	Gamm isIbcPacketData_Gamm `protobuf_oneof:"gamm"`
 }
 
 func (m *IbcPacketData) Reset()         { *m = IbcPacketData{} }
@@ -63,95 +74,76 @@ func (m *IbcPacketData) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_IbcPacketData proto.InternalMessageInfo
 
-func (m *IbcPacketData) GetGamm() *GammPacketData {
+type isIbcPacketData_Gamm interface {
+	isIbcPacketData_Gamm()
+	MarshalTo([]byte) (int, error)
+	Size() int
+}
+
+type IbcPacketData_NoData struct {
+	NoData *NoData `protobuf:"bytes,5,opt,name=noData,proto3,oneof" json:"noData,omitempty"`
+}
+type IbcPacketData_Swap struct {
+	Swap *SwapExactAmountInPacketData `protobuf:"bytes,6,opt,name=swap,proto3,oneof" json:"swap,omitempty"`
+}
+
+func (*IbcPacketData_NoData) isIbcPacketData_Gamm() {}
+func (*IbcPacketData_Swap) isIbcPacketData_Gamm()   {}
+
+func (m *IbcPacketData) GetGamm() isIbcPacketData_Gamm {
 	if m != nil {
 		return m.Gamm
 	}
 	return nil
 }
 
-type GammPacketData struct {
-	// Types that are valid to be assigned to Packet:
-	//	*GammPacketData_NoData
-	//	*GammPacketData_Swap
-	Packet isGammPacketData_Packet `protobuf_oneof:"packet"`
-}
-
-func (m *GammPacketData) Reset()         { *m = GammPacketData{} }
-func (m *GammPacketData) String() string { return proto.CompactTextString(m) }
-func (*GammPacketData) ProtoMessage()    {}
-func (*GammPacketData) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1237dc1d0bd93ed0, []int{1}
-}
-func (m *GammPacketData) XXX_Unmarshal(b []byte) error {
-	return m.Unmarshal(b)
-}
-func (m *GammPacketData) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	if deterministic {
-		return xxx_messageInfo_GammPacketData.Marshal(b, m, deterministic)
-	} else {
-		b = b[:cap(b)]
-		n, err := m.MarshalToSizedBuffer(b)
-		if err != nil {
-			return nil, err
-		}
-		return b[:n], nil
-	}
-}
-func (m *GammPacketData) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_GammPacketData.Merge(m, src)
-}
-func (m *GammPacketData) XXX_Size() int {
-	return m.Size()
-}
-func (m *GammPacketData) XXX_DiscardUnknown() {
-	xxx_messageInfo_GammPacketData.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_GammPacketData proto.InternalMessageInfo
-
-type isGammPacketData_Packet interface {
-	isGammPacketData_Packet()
-	MarshalTo([]byte) (int, error)
-	Size() int
-}
-
-type GammPacketData_NoData struct {
-	NoData *NoData `protobuf:"bytes,1,opt,name=noData,proto3,oneof" json:"noData,omitempty"`
-}
-type GammPacketData_Swap struct {
-	Swap *SwapExactAmountInPacketData `protobuf:"bytes,2,opt,name=swap,proto3,oneof" json:"swap,omitempty"`
-}
-
-func (*GammPacketData_NoData) isGammPacketData_Packet() {}
-func (*GammPacketData_Swap) isGammPacketData_Packet()   {}
-
-func (m *GammPacketData) GetPacket() isGammPacketData_Packet {
+func (m *IbcPacketData) GetDenom() string {
 	if m != nil {
-		return m.Packet
+		return m.Denom
 	}
-	return nil
+	return ""
 }
 
-func (m *GammPacketData) GetNoData() *NoData {
-	if x, ok := m.GetPacket().(*GammPacketData_NoData); ok {
+func (m *IbcPacketData) GetAmount() string {
+	if m != nil {
+		return m.Amount
+	}
+	return ""
+}
+
+func (m *IbcPacketData) GetSender() string {
+	if m != nil {
+		return m.Sender
+	}
+	return ""
+}
+
+func (m *IbcPacketData) GetReceiver() string {
+	if m != nil {
+		return m.Receiver
+	}
+	return ""
+}
+
+func (m *IbcPacketData) GetNoData() *NoData {
+	if x, ok := m.GetGamm().(*IbcPacketData_NoData); ok {
 		return x.NoData
 	}
 	return nil
 }
 
-func (m *GammPacketData) GetSwap() *SwapExactAmountInPacketData {
-	if x, ok := m.GetPacket().(*GammPacketData_Swap); ok {
+func (m *IbcPacketData) GetSwap() *SwapExactAmountInPacketData {
+	if x, ok := m.GetGamm().(*IbcPacketData_Swap); ok {
 		return x.Swap
 	}
 	return nil
 }
 
 // XXX_OneofWrappers is for the internal use of the proto package.
-func (*GammPacketData) XXX_OneofWrappers() []interface{} {
+func (*IbcPacketData) XXX_OneofWrappers() []interface{} {
 	return []interface{}{
-		(*GammPacketData_NoData)(nil),
-		(*GammPacketData_Swap)(nil),
+		(*IbcPacketData_NoData)(nil),
+		(*IbcPacketData_Swap)(nil),
 	}
 }
 
@@ -162,7 +154,7 @@ func (m *NoData) Reset()         { *m = NoData{} }
 func (m *NoData) String() string { return proto.CompactTextString(m) }
 func (*NoData) ProtoMessage()    {}
 func (*NoData) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1237dc1d0bd93ed0, []int{2}
+	return fileDescriptor_1237dc1d0bd93ed0, []int{1}
 }
 func (m *NoData) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -200,7 +192,7 @@ func (m *SwapAmountInRoute) Reset()         { *m = SwapAmountInRoute{} }
 func (m *SwapAmountInRoute) String() string { return proto.CompactTextString(m) }
 func (*SwapAmountInRoute) ProtoMessage()    {}
 func (*SwapAmountInRoute) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1237dc1d0bd93ed0, []int{3}
+	return fileDescriptor_1237dc1d0bd93ed0, []int{2}
 }
 func (m *SwapAmountInRoute) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -253,7 +245,7 @@ func (m *SwapExactAmountInPacketData) Reset()         { *m = SwapExactAmountInPa
 func (m *SwapExactAmountInPacketData) String() string { return proto.CompactTextString(m) }
 func (*SwapExactAmountInPacketData) ProtoMessage()    {}
 func (*SwapExactAmountInPacketData) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1237dc1d0bd93ed0, []int{4}
+	return fileDescriptor_1237dc1d0bd93ed0, []int{3}
 }
 func (m *SwapExactAmountInPacketData) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -306,7 +298,7 @@ func (m *SwapExactAmountInAck) Reset()         { *m = SwapExactAmountInAck{} }
 func (m *SwapExactAmountInAck) String() string { return proto.CompactTextString(m) }
 func (*SwapExactAmountInAck) ProtoMessage()    {}
 func (*SwapExactAmountInAck) Descriptor() ([]byte, []int) {
-	return fileDescriptor_1237dc1d0bd93ed0, []int{5}
+	return fileDescriptor_1237dc1d0bd93ed0, []int{4}
 }
 func (m *SwapExactAmountInAck) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -351,7 +343,6 @@ func (m *SwapExactAmountInAck) GetAmount() string {
 
 func init() {
 	proto.RegisterType((*IbcPacketData)(nil), "ibcosmo.interswap.v1beta1.IbcPacketData")
-	proto.RegisterType((*GammPacketData)(nil), "ibcosmo.interswap.v1beta1.GammPacketData")
 	proto.RegisterType((*NoData)(nil), "ibcosmo.interswap.v1beta1.NoData")
 	proto.RegisterType((*SwapAmountInRoute)(nil), "ibcosmo.interswap.v1beta1.SwapAmountInRoute")
 	proto.RegisterType((*SwapExactAmountInPacketData)(nil), "ibcosmo.interswap.v1beta1.SwapExactAmountInPacketData")
@@ -361,41 +352,36 @@ func init() {
 func init() { proto.RegisterFile("interswap/v1beta1/packet.proto", fileDescriptor_1237dc1d0bd93ed0) }
 
 var fileDescriptor_1237dc1d0bd93ed0 = []byte{
-	// 535 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x84, 0x53, 0xcf, 0x6e, 0xd3, 0x30,
-	0x1c, 0x4e, 0xb6, 0x12, 0x3a, 0x4f, 0x1d, 0x9a, 0x55, 0x41, 0x19, 0x52, 0x3a, 0x72, 0x98, 0x36,
-	0x89, 0xd9, 0x5a, 0x11, 0x5c, 0x10, 0x87, 0x55, 0x05, 0x5a, 0xc4, 0x3f, 0x85, 0x9d, 0xb8, 0x44,
-	0x4e, 0xe2, 0x16, 0xab, 0x8d, 0x1d, 0x25, 0x4e, 0x37, 0x78, 0x0a, 0x5e, 0x82, 0x57, 0xe0, 0x19,
-	0x76, 0xec, 0x11, 0x71, 0xa8, 0x50, 0x7b, 0xe3, 0x29, 0x90, 0x1d, 0x97, 0xb6, 0x42, 0x94, 0x53,
-	0xfc, 0xfb, 0xe5, 0xfb, 0xbe, 0xdf, 0xf7, 0xfd, 0x2c, 0x03, 0x97, 0x71, 0x49, 0xb3, 0xfc, 0x92,
-	0xa4, 0x78, 0x7c, 0x16, 0x52, 0x49, 0xce, 0x70, 0x4a, 0xa2, 0x21, 0x95, 0x28, 0xcd, 0x84, 0x14,
-	0xf0, 0x2e, 0x0b, 0x23, 0x91, 0x27, 0x02, 0xfd, 0xc1, 0x21, 0x83, 0x3b, 0xa8, 0x0f, 0xc4, 0x40,
-	0x68, 0x14, 0x56, 0xa7, 0x92, 0x70, 0x70, 0xc2, 0xc2, 0x08, 0x93, 0x34, 0x1d, 0xb1, 0x88, 0x48,
-	0x26, 0x78, 0x8e, 0x65, 0x46, 0x78, 0xde, 0xa7, 0x19, 0x1e, 0xb7, 0xd6, 0xb4, 0xbd, 0x6f, 0x36,
-	0xa8, 0xf5, 0xc2, 0xe8, 0x9d, 0xee, 0x75, 0x88, 0x24, 0xb0, 0x0f, 0xf6, 0xfa, 0x05, 0x1f, 0xb0,
-	0x70, 0x44, 0x03, 0x29, 0x86, 0x94, 0x37, 0xec, 0x43, 0xfb, 0x78, 0xb7, 0xf5, 0x08, 0xb1, 0x30,
-	0x42, 0xab, 0xaa, 0x68, 0xa1, 0x8a, 0xc6, 0x2d, 0xf4, 0xdc, 0x70, 0x2e, 0x14, 0x65, 0x29, 0xd7,
-	0xae, 0x4e, 0xa6, 0x4d, 0xfb, 0xd7, 0xb4, 0x69, 0xf9, 0xb5, 0xfe, 0x2a, 0x04, 0x3e, 0x05, 0x95,
-	0x01, 0x49, 0x92, 0xc6, 0x96, 0x56, 0x3f, 0x41, 0xff, 0x0c, 0x89, 0x5e, 0x90, 0x24, 0x59, 0x2a,
-	0xfa, 0x9a, 0xe6, 0x7d, 0xb5, 0xc1, 0xde, 0xfa, 0x0f, 0xf8, 0x04, 0x38, 0x5c, 0xa8, 0x93, 0x71,
-	0x7c, 0x7f, 0x83, 0xe6, 0x1b, 0x0d, 0xec, 0x5a, 0xbe, 0xa1, 0xc0, 0x57, 0xa0, 0xa2, 0x00, 0xc6,
-	0xce, 0xe3, 0x0d, 0xd4, 0xf7, 0x97, 0x24, 0x7d, 0x76, 0x45, 0x22, 0x79, 0x9e, 0x88, 0x82, 0xcb,
-	0xde, 0x4a, 0xda, 0xae, 0xe5, 0x6b, 0x95, 0x76, 0x15, 0x38, 0xe5, 0x9a, 0xbd, 0x2a, 0x70, 0xca,
-	0x59, 0xde, 0x05, 0xd8, 0x57, 0xd4, 0x05, 0xcb, 0x17, 0x85, 0xa4, 0xf0, 0x0e, 0xb8, 0x99, 0x0a,
-	0x31, 0x0a, 0x58, 0xac, 0x4d, 0x57, 0x7c, 0x47, 0x95, 0xbd, 0x18, 0x1e, 0x81, 0x5b, 0x7a, 0xfb,
-	0x81, 0x28, 0x64, 0x10, 0x53, 0x2e, 0xca, 0x4d, 0xed, 0xf8, 0x35, 0xdd, 0x7e, 0x5b, 0xc8, 0x8e,
-	0x6a, 0x7a, 0x33, 0x1b, 0xdc, 0xdb, 0xe0, 0x08, 0xde, 0x06, 0x4e, 0x4e, 0x79, 0x4c, 0x33, 0xad,
-	0xbf, 0xe3, 0x9b, 0x0a, 0xbe, 0x04, 0x4e, 0xa6, 0x1c, 0xe4, 0x8d, 0xad, 0xc3, 0xed, 0xe3, 0xdd,
-	0xd6, 0x83, 0xff, 0x24, 0x5e, 0xb3, 0xdd, 0xae, 0x5c, 0xab, 0x1b, 0x35, 0x0a, 0x30, 0x00, 0xf5,
-	0xa5, 0xd7, 0x84, 0xf1, 0x80, 0x68, 0x70, 0x63, 0x5b, 0x4d, 0x6c, 0x23, 0x85, 0xfd, 0x31, 0x6d,
-	0x1e, 0x0d, 0x98, 0xfc, 0x58, 0x84, 0x28, 0x12, 0x09, 0xd6, 0x93, 0x72, 0xf3, 0x39, 0xcd, 0xe3,
-	0x21, 0x96, 0x9f, 0x52, 0x9a, 0xa3, 0x1e, 0x97, 0xfe, 0xfe, 0x22, 0xe0, 0x6b, 0xc6, 0xcb, 0xa9,
-	0x5e, 0x07, 0xd4, 0xff, 0xca, 0x78, 0x1e, 0x0d, 0x61, 0x1d, 0xdc, 0x28, 0x57, 0x53, 0x66, 0x2b,
-	0x0b, 0x15, 0xd9, 0x18, 0x28, 0x37, 0x66, 0xaa, 0x76, 0xf7, 0x7a, 0xe6, 0xda, 0x93, 0x99, 0x6b,
-	0xff, 0x9c, 0xb9, 0xf6, 0x97, 0xb9, 0x6b, 0x4d, 0xe6, 0xae, 0xf5, 0x7d, 0xee, 0x5a, 0x1f, 0xd0,
-	0x8a, 0xb5, 0x98, 0xe5, 0x29, 0xcd, 0x3e, 0x53, 0xcc, 0xc2, 0xe8, 0x54, 0xf9, 0xc3, 0x57, 0x78,
-	0xf9, 0x40, 0xb5, 0xcd, 0xd0, 0xd1, 0x8f, 0xe7, 0xe1, 0xef, 0x00, 0x00, 0x00, 0xff, 0xff, 0x79,
-	0x07, 0xb7, 0x3c, 0xba, 0x03, 0x00, 0x00,
+	// 463 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x53, 0x4d, 0x6f, 0xd4, 0x30,
+	0x10, 0x4d, 0xb6, 0x69, 0x28, 0x53, 0x55, 0xa8, 0xd6, 0x0a, 0x42, 0x91, 0xd2, 0x25, 0x87, 0x6a,
+	0x0f, 0xd4, 0x51, 0x8b, 0xc4, 0x85, 0x53, 0x57, 0x8b, 0xb4, 0x8b, 0xf8, 0x52, 0xe0, 0xc4, 0x25,
+	0x72, 0x1c, 0x6b, 0xb1, 0x96, 0xd8, 0x51, 0xec, 0xb4, 0x85, 0x33, 0x3f, 0x80, 0x9f, 0xd5, 0x63,
+	0x8f, 0x88, 0x43, 0x85, 0x76, 0xff, 0x08, 0xb2, 0x9d, 0x76, 0x5b, 0x21, 0x8a, 0x38, 0x25, 0xf3,
+	0xf2, 0xde, 0xcc, 0x9b, 0x67, 0x07, 0x62, 0x2e, 0x34, 0x6b, 0xd4, 0x09, 0xa9, 0xd3, 0xe3, 0x83,
+	0x82, 0x69, 0x72, 0x90, 0xd6, 0x84, 0xce, 0x99, 0xc6, 0x75, 0x23, 0xb5, 0x44, 0x0f, 0x79, 0x41,
+	0xa5, 0xaa, 0x24, 0xbe, 0xe2, 0xe1, 0x8e, 0xb7, 0xd3, 0x9f, 0xc9, 0x99, 0xb4, 0xac, 0xd4, 0xbc,
+	0x39, 0x41, 0xf2, 0xad, 0x07, 0x5b, 0xd3, 0x82, 0xbe, 0xb3, 0x4d, 0xc6, 0x44, 0x13, 0xd4, 0x87,
+	0xf5, 0x92, 0x09, 0x59, 0x45, 0xfe, 0xc0, 0x1f, 0xde, 0xcd, 0x5c, 0x81, 0xee, 0x43, 0x48, 0x2a,
+	0xd9, 0x0a, 0x1d, 0xf5, 0x2c, 0xdc, 0x55, 0x06, 0x57, 0x4c, 0x94, 0xac, 0x89, 0xd6, 0x1c, 0xee,
+	0x2a, 0xb4, 0x03, 0x1b, 0x0d, 0xa3, 0x8c, 0x1f, 0xb3, 0x26, 0x0a, 0xec, 0x97, 0xab, 0x1a, 0x3d,
+	0x87, 0x50, 0x48, 0x33, 0x2b, 0x5a, 0x1f, 0xf8, 0xc3, 0xcd, 0xc3, 0xc7, 0xf8, 0xaf, 0xae, 0xf1,
+	0x1b, 0x4b, 0x9c, 0x78, 0x59, 0x27, 0x41, 0xaf, 0x20, 0x30, 0x84, 0x28, 0xb4, 0xd2, 0x67, 0xb7,
+	0x48, 0xdf, 0x9f, 0x90, 0xfa, 0xc5, 0x29, 0xa1, 0xfa, 0xc8, 0x5a, 0x9d, 0x8a, 0xd5, 0x92, 0x13,
+	0x2f, 0xb3, 0x5d, 0x46, 0x21, 0x04, 0x33, 0x52, 0x55, 0xc9, 0x06, 0x84, 0x6e, 0x52, 0xf2, 0x01,
+	0xb6, 0x8d, 0xf0, 0x52, 0x93, 0xc9, 0x56, 0x33, 0xf4, 0x00, 0xee, 0xd4, 0x52, 0x7e, 0xce, 0x79,
+	0x69, 0x53, 0x09, 0xb2, 0xd0, 0x94, 0xd3, 0x12, 0xed, 0xc1, 0x3d, 0x2d, 0xe7, 0x4c, 0xe4, 0xb2,
+	0xd5, 0xb9, 0x8b, 0xcd, 0xe5, 0xb3, 0x65, 0xe1, 0xb7, 0xad, 0x1e, 0x1b, 0x30, 0x59, 0xf8, 0xf0,
+	0xe8, 0x16, 0x3f, 0xd7, 0x62, 0xf4, 0x6f, 0xc4, 0xf8, 0x12, 0xc2, 0xc6, 0x38, 0x50, 0x51, 0x6f,
+	0xb0, 0x36, 0xdc, 0x3c, 0x7c, 0xf2, 0x8f, 0x7d, 0x6f, 0xd8, 0x1e, 0x05, 0x67, 0x17, 0xbb, 0x5e,
+	0xd6, 0x75, 0x40, 0x39, 0xf4, 0x57, 0x5e, 0x2b, 0x2e, 0xf2, 0xee, 0x40, 0xed, 0xc1, 0x8d, 0xb0,
+	0xe1, 0xfe, 0xbc, 0xd8, 0xdd, 0x9b, 0x71, 0xfd, 0xa9, 0x2d, 0x30, 0x95, 0x55, 0x6a, 0x27, 0xa9,
+	0xee, 0xb1, 0xaf, 0xca, 0x79, 0xaa, 0xbf, 0xd4, 0x4c, 0xe1, 0xa9, 0xd0, 0xd9, 0xf6, 0xe5, 0x82,
+	0xaf, 0xb9, 0x70, 0x53, 0x93, 0x31, 0xf4, 0xff, 0xd8, 0xf1, 0x88, 0xce, 0xff, 0xef, 0x46, 0x8d,
+	0x26, 0x67, 0x8b, 0xd8, 0x3f, 0x5f, 0xc4, 0xfe, 0xaf, 0x45, 0xec, 0x7f, 0x5f, 0xc6, 0xde, 0xf9,
+	0x32, 0xf6, 0x7e, 0x2c, 0x63, 0xef, 0x23, 0xbe, 0x66, 0xad, 0xe4, 0xaa, 0x66, 0xcd, 0x57, 0x96,
+	0xf2, 0x82, 0xee, 0x1b, 0x7f, 0xe9, 0x69, 0xba, 0xfa, 0x37, 0xac, 0xcd, 0x22, 0xb4, 0x57, 0xfc,
+	0xe9, 0xef, 0x00, 0x00, 0x00, 0xff, 0xff, 0xb1, 0x4e, 0x17, 0x70, 0x35, 0x03, 0x00, 0x00,
 }
 
 func (m *IbcPacketData) Marshal() (dAtA []byte, err error) {
@@ -420,69 +406,50 @@ func (m *IbcPacketData) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = l
 	if m.Gamm != nil {
 		{
-			size, err := m.Gamm.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
+			size := m.Gamm.Size()
+			i -= size
+			if _, err := m.Gamm.MarshalTo(dAtA[i:]); err != nil {
 				return 0, err
 			}
-			i -= size
-			i = encodeVarintPacket(dAtA, i, uint64(size))
 		}
+	}
+	if len(m.Receiver) > 0 {
+		i -= len(m.Receiver)
+		copy(dAtA[i:], m.Receiver)
+		i = encodeVarintPacket(dAtA, i, uint64(len(m.Receiver)))
+		i--
+		dAtA[i] = 0x22
+	}
+	if len(m.Sender) > 0 {
+		i -= len(m.Sender)
+		copy(dAtA[i:], m.Sender)
+		i = encodeVarintPacket(dAtA, i, uint64(len(m.Sender)))
+		i--
+		dAtA[i] = 0x1a
+	}
+	if len(m.Amount) > 0 {
+		i -= len(m.Amount)
+		copy(dAtA[i:], m.Amount)
+		i = encodeVarintPacket(dAtA, i, uint64(len(m.Amount)))
 		i--
 		dAtA[i] = 0x12
 	}
-	if m.FungibleTokenPacketData != nil {
-		{
-			size, err := m.FungibleTokenPacketData.MarshalToSizedBuffer(dAtA[:i])
-			if err != nil {
-				return 0, err
-			}
-			i -= size
-			i = encodeVarintPacket(dAtA, i, uint64(size))
-		}
+	if len(m.Denom) > 0 {
+		i -= len(m.Denom)
+		copy(dAtA[i:], m.Denom)
+		i = encodeVarintPacket(dAtA, i, uint64(len(m.Denom)))
 		i--
 		dAtA[i] = 0xa
 	}
 	return len(dAtA) - i, nil
 }
 
-func (m *GammPacketData) Marshal() (dAtA []byte, err error) {
-	size := m.Size()
-	dAtA = make([]byte, size)
-	n, err := m.MarshalToSizedBuffer(dAtA[:size])
-	if err != nil {
-		return nil, err
-	}
-	return dAtA[:n], nil
-}
-
-func (m *GammPacketData) MarshalTo(dAtA []byte) (int, error) {
+func (m *IbcPacketData_NoData) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *GammPacketData) MarshalToSizedBuffer(dAtA []byte) (int, error) {
-	i := len(dAtA)
-	_ = i
-	var l int
-	_ = l
-	if m.Packet != nil {
-		{
-			size := m.Packet.Size()
-			i -= size
-			if _, err := m.Packet.MarshalTo(dAtA[i:]); err != nil {
-				return 0, err
-			}
-		}
-	}
-	return len(dAtA) - i, nil
-}
-
-func (m *GammPacketData_NoData) MarshalTo(dAtA []byte) (int, error) {
-	size := m.Size()
-	return m.MarshalToSizedBuffer(dAtA[:size])
-}
-
-func (m *GammPacketData_NoData) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *IbcPacketData_NoData) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.NoData != nil {
 		{
@@ -494,16 +461,16 @@ func (m *GammPacketData_NoData) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			i = encodeVarintPacket(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0xa
+		dAtA[i] = 0x2a
 	}
 	return len(dAtA) - i, nil
 }
-func (m *GammPacketData_Swap) MarshalTo(dAtA []byte) (int, error) {
+func (m *IbcPacketData_Swap) MarshalTo(dAtA []byte) (int, error) {
 	size := m.Size()
 	return m.MarshalToSizedBuffer(dAtA[:size])
 }
 
-func (m *GammPacketData_Swap) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+func (m *IbcPacketData_Swap) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	i := len(dAtA)
 	if m.Swap != nil {
 		{
@@ -515,7 +482,7 @@ func (m *GammPacketData_Swap) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 			i = encodeVarintPacket(dAtA, i, uint64(size))
 		}
 		i--
-		dAtA[i] = 0x12
+		dAtA[i] = 0x32
 	}
 	return len(dAtA) - i, nil
 }
@@ -685,30 +652,29 @@ func (m *IbcPacketData) Size() (n int) {
 	}
 	var l int
 	_ = l
-	if m.FungibleTokenPacketData != nil {
-		l = m.FungibleTokenPacketData.Size()
+	l = len(m.Denom)
+	if l > 0 {
+		n += 1 + l + sovPacket(uint64(l))
+	}
+	l = len(m.Amount)
+	if l > 0 {
+		n += 1 + l + sovPacket(uint64(l))
+	}
+	l = len(m.Sender)
+	if l > 0 {
+		n += 1 + l + sovPacket(uint64(l))
+	}
+	l = len(m.Receiver)
+	if l > 0 {
 		n += 1 + l + sovPacket(uint64(l))
 	}
 	if m.Gamm != nil {
-		l = m.Gamm.Size()
-		n += 1 + l + sovPacket(uint64(l))
+		n += m.Gamm.Size()
 	}
 	return n
 }
 
-func (m *GammPacketData) Size() (n int) {
-	if m == nil {
-		return 0
-	}
-	var l int
-	_ = l
-	if m.Packet != nil {
-		n += m.Packet.Size()
-	}
-	return n
-}
-
-func (m *GammPacketData_NoData) Size() (n int) {
+func (m *IbcPacketData_NoData) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -720,7 +686,7 @@ func (m *GammPacketData_NoData) Size() (n int) {
 	}
 	return n
 }
-func (m *GammPacketData_Swap) Size() (n int) {
+func (m *IbcPacketData_Swap) Size() (n int) {
 	if m == nil {
 		return 0
 	}
@@ -832,9 +798,9 @@ func (m *IbcPacketData) Unmarshal(dAtA []byte) error {
 		switch fieldNum {
 		case 1:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field FungibleTokenPacketData", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Denom", wireType)
 			}
-			var msglen int
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowPacket
@@ -844,33 +810,29 @@ func (m *IbcPacketData) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthPacket
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + intStringLen
 			if postIndex < 0 {
 				return ErrInvalidLengthPacket
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.FungibleTokenPacketData == nil {
-				m.FungibleTokenPacketData = &types.FungibleTokenPacketData{}
-			}
-			if err := m.FungibleTokenPacketData.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
+			m.Denom = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
 		case 2:
 			if wireType != 2 {
-				return fmt.Errorf("proto: wrong wireType = %d for field Gamm", wireType)
+				return fmt.Errorf("proto: wrong wireType = %d for field Amount", wireType)
 			}
-			var msglen int
+			var stringLen uint64
 			for shift := uint(0); ; shift += 7 {
 				if shift >= 64 {
 					return ErrIntOverflowPacket
@@ -880,79 +842,89 @@ func (m *IbcPacketData) Unmarshal(dAtA []byte) error {
 				}
 				b := dAtA[iNdEx]
 				iNdEx++
-				msglen |= int(b&0x7F) << shift
+				stringLen |= uint64(b&0x7F) << shift
 				if b < 0x80 {
 					break
 				}
 			}
-			if msglen < 0 {
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthPacket
 			}
-			postIndex := iNdEx + msglen
+			postIndex := iNdEx + intStringLen
 			if postIndex < 0 {
 				return ErrInvalidLengthPacket
 			}
 			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			if m.Gamm == nil {
-				m.Gamm = &GammPacketData{}
-			}
-			if err := m.Gamm.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
-				return err
-			}
+			m.Amount = string(dAtA[iNdEx:postIndex])
 			iNdEx = postIndex
-		default:
-			iNdEx = preIndex
-			skippy, err := skipPacket(dAtA[iNdEx:])
-			if err != nil {
-				return err
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Sender", wireType)
 			}
-			if (skippy < 0) || (iNdEx+skippy) < 0 {
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPacket
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
 				return ErrInvalidLengthPacket
 			}
-			if (iNdEx + skippy) > l {
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPacket
+			}
+			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			iNdEx += skippy
-		}
-	}
-
-	if iNdEx > l {
-		return io.ErrUnexpectedEOF
-	}
-	return nil
-}
-func (m *GammPacketData) Unmarshal(dAtA []byte) error {
-	l := len(dAtA)
-	iNdEx := 0
-	for iNdEx < l {
-		preIndex := iNdEx
-		var wire uint64
-		for shift := uint(0); ; shift += 7 {
-			if shift >= 64 {
-				return ErrIntOverflowPacket
+			m.Sender = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 4:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Receiver", wireType)
 			}
-			if iNdEx >= l {
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowPacket
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthPacket
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthPacket
+			}
+			if postIndex > l {
 				return io.ErrUnexpectedEOF
 			}
-			b := dAtA[iNdEx]
-			iNdEx++
-			wire |= uint64(b&0x7F) << shift
-			if b < 0x80 {
-				break
-			}
-		}
-		fieldNum := int32(wire >> 3)
-		wireType := int(wire & 0x7)
-		if wireType == 4 {
-			return fmt.Errorf("proto: GammPacketData: wiretype end group for non-group")
-		}
-		if fieldNum <= 0 {
-			return fmt.Errorf("proto: GammPacketData: illegal tag %d (wire type %d)", fieldNum, wire)
-		}
-		switch fieldNum {
-		case 1:
+			m.Receiver = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 5:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field NoData", wireType)
 			}
@@ -985,9 +957,9 @@ func (m *GammPacketData) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Packet = &GammPacketData_NoData{v}
+			m.Gamm = &IbcPacketData_NoData{v}
 			iNdEx = postIndex
-		case 2:
+		case 6:
 			if wireType != 2 {
 				return fmt.Errorf("proto: wrong wireType = %d for field Swap", wireType)
 			}
@@ -1020,7 +992,7 @@ func (m *GammPacketData) Unmarshal(dAtA []byte) error {
 			if err := v.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
-			m.Packet = &GammPacketData_Swap{v}
+			m.Gamm = &IbcPacketData_Swap{v}
 			iNdEx = postIndex
 		default:
 			iNdEx = preIndex

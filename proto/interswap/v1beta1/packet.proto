@@ -3,21 +3,23 @@ syntax = "proto3";
 package ibcosmo.interswap.v1beta1;
 
 import "gogoproto/gogo.proto";
-import "ibc/applications/transfer/v2/packet.proto";
 
 option go_package = "github.com/disperze/ibc-osmo/x/interswap/types";
 
 message IbcPacketData {
-    ibc.applications.transfer.v2.FungibleTokenPacketData fungible_token = 1
-        [ (gogoproto.embed) = true, (gogoproto.jsontag) = "" ];
-    GammPacketData gamm = 2;
-}
-
-message GammPacketData {
-    oneof packet {
-        NoData noData = 1;
-        SwapExactAmountInPacketData swap = 2;
-    }
+  // the token denomination to be transferred
+  string denom = 1;
+  // the token amount to be transferred
+  string amount = 2;
+  // the sender address
+  string sender = 3;
+  // the recipient address on the destination chain
+  string receiver = 4;
+  // the gamm action
+  oneof gamm {
+      NoData noData = 5;
+      SwapExactAmountInPacketData swap = 6;
+  }
 }
 
 message NoData {
