@@ -6,8 +6,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
+	transfertypes "github.com/cosmos/ibc-go/v2/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
 	ibcexported "github.com/cosmos/ibc-go/v2/modules/core/exported"
+
 	"github.com/disperze/ibc-osmo/x/interswap/types"
 )
 
@@ -94,17 +96,12 @@ func (am AppModule) OnRecvPacket(
 		return am.app.OnRecvPacket(ctx, packet, relayer)
 	}
 
-	receiver := am.keeper.GetSwapAddress()
-	newData := modulePacketData
-	newData.Receiver = receiver.String()
-	bz, err := newData.GetSafeBytes()
-	if err != nil {
-		return channeltypes.NewErrorAcknowledgement(err.Error())
-	}
+	receiver := types.GetFundAddress(packet.GetDestPort(), packet.GetDestChannel())
+	newData := transfertypes.NewFungibleTokenPacketData(modulePacketData.Denom, modulePacketData.Amount, modulePacketData.Sender, receiver.String())
 
 	newPacket := packet
-	newPacket.Data = bz
-	ics20Ack := am.app.OnRecvPacket(ctx, packet, relayer)
+	newPacket.Data = newData.GetBytes()
+	ics20Ack := am.app.OnRecvPacket(ctx, newPacket, relayer)
 	if !ics20Ack.Success() {
 		return ics20Ack
 	}

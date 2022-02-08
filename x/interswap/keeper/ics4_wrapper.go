@@ -7,21 +7,17 @@ import (
 	transfertypes "github.com/cosmos/ibc-go/v2/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
 	ibcexported "github.com/cosmos/ibc-go/v2/modules/core/exported"
-	interswaptypes "github.com/disperze/ibc-osmo/x/interswap/types"
+
+	"github.com/disperze/ibc-osmo/x/interswap/types"
 )
 
 type SwapICS4Wrapper struct {
-	channelKeeper   transfertypes.ChannelKeeper
-	interswapKeeper interswaptypes.InterSwapKeeper
+	channelKeeper transfertypes.ChannelKeeper
 }
 
-func NewSwapICS4Wrapper(
-	channelKeeper transfertypes.ChannelKeeper,
-	interswapKeeper interswaptypes.InterSwapKeeper,
-) SwapICS4Wrapper {
+func NewSwapICS4Wrapper(channelKeeper transfertypes.ChannelKeeper) SwapICS4Wrapper {
 	return SwapICS4Wrapper{
-		channelKeeper:   channelKeeper,
-		interswapKeeper: interswapKeeper,
+		channelKeeper: channelKeeper,
 	}
 }
 
@@ -34,10 +30,10 @@ func (w SwapICS4Wrapper) GetNextSequenceSend(ctx sdk.Context, portID, channelID 
 }
 
 func (w SwapICS4Wrapper) SendPacket(ctx sdk.Context, channelCap *capabilitytypes.Capability, packet ibcexported.PacketI) error {
-	swapAddress := w.interswapKeeper.GetSwapAddress().String()
+	swapAddress := types.GetFundAddress(packet.GetSourcePort(), packet.GetSourceChannel()).String()
 	var data transfertypes.FungibleTokenPacketData
-	if err := interswaptypes.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
-		return sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal send packet data: %s", err.Error())
+	if err := types.ModuleCdc.UnmarshalJSON(packet.GetData(), &data); err != nil {
+		return sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal sent packet data: %s", err.Error())
 	}
 
 	// if Sent from the swap address, skip packet

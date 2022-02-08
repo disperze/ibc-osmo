@@ -32,7 +32,3 @@ func NewKeeper(
 		gammKeeper:     gammKeeper,
 	}
 }
-
-func (k Keeper) GetSwapAddress() sdk.AccAddress {
-	return k.authKeeper.GetModuleAddress(types.ModuleName)
-}
