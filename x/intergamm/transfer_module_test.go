@@ -1,4 +1,4 @@
-package interswap_test
+package intergamm_test
 
 import (
 	"math"

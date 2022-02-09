@@ -9,7 +9,7 @@ import (
 
 const (
 	// ModuleName defines the module name
-	ModuleName = "interswap"
+	ModuleName = "intergamm"
 
 	// StoreKey defines the primary module store key
 	StoreKey = ModuleName

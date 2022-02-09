@@ -1,10 +1,10 @@
 syntax = "proto3";
 
-package ibcosmo.interswap.v1beta1;
+package ibcosmo.intergamm.v1beta1;
 
 import "gogoproto/gogo.proto";
 
-option go_package = "github.com/disperze/ibc-osmo/x/interswap/types";
+option go_package = "github.com/disperze/ibc-osmo/x/intergamm/types";
 
 message IbcPacketData {
   // the token denomination to be transferred

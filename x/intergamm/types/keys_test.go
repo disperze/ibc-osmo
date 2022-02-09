@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/disperze/ibc-osmo/x/interswap/types"
+	"github.com/disperze/ibc-osmo/x/intergamm/types"
 )
 
 func TestGetFundAddress(t *testing.T) {

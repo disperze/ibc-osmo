@@ -4,7 +4,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 
-	"github.com/disperze/ibc-osmo/x/interswap/types"
+	"github.com/disperze/ibc-osmo/x/intergamm/types"
 )
 
 type Keeper struct {

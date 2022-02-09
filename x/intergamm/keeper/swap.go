@@ -6,7 +6,7 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	clienttypes "github.com/cosmos/ibc-go/v2/modules/core/02-client/types"
 	channeltypes "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
-	"github.com/disperze/ibc-osmo/x/interswap/types"
+	"github.com/disperze/ibc-osmo/x/intergamm/types"
 )
 
 // OnRecvSwapPacket processes packet reception

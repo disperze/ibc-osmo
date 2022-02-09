@@ -8,7 +8,7 @@ import (
 	channeltypes "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
 	ibcexported "github.com/cosmos/ibc-go/v2/modules/core/exported"
 
-	"github.com/disperze/ibc-osmo/x/interswap/types"
+	"github.com/disperze/ibc-osmo/x/intergamm/types"
 )
 
 type SwapICS4Wrapper struct {

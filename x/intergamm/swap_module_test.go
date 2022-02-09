@@ -1,4 +1,4 @@
-package interswap_test
+package intergamm_test
 
 import (
 	"fmt"
@@ -13,7 +13,7 @@ import (
 	ibctesting "github.com/cosmos/ibc-go/v2/testing"
 
 	"github.com/disperze/ibc-osmo/testutil/simapp"
-	"github.com/disperze/ibc-osmo/x/interswap/types"
+	"github.com/disperze/ibc-osmo/x/intergamm/types"
 )
 
 type GammTestSuite struct {

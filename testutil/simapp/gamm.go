@@ -5,10 +5,10 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	ibcswaptypes "github.com/disperze/ibc-osmo/x/interswap/types"
+	ibcgammtypes "github.com/disperze/ibc-osmo/x/intergamm/types"
 )
 
-var _ ibcswaptypes.GammKeeper = (*SwapKeeperTest)(nil)
+var _ ibcgammtypes.GammKeeper = (*SwapKeeperTest)(nil)
 
 const InvalidDenom = "n/a"
 
