@@ -31,7 +31,7 @@ func NewIbcJoinPoolPacketData(sender, receiver, amount, denom string, poolID uin
 		Gamm: &IbcPacketData_JoinPool{
 			JoinPool: &JoinPoolPacketData{
 				Sender:            sender,
-				PoolId:            poolID,
+				PoolID:            poolID,
 				ShareOutMinAmount: shareOutMinAmount,
 			},
 		},

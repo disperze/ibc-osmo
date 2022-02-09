@@ -76,7 +76,7 @@ func (suite *GammTestSuite) TestOnRecvSwapPacket() {
 					sdk.DefaultBondDenom,
 					[]types.SwapAmountInRoute{
 						{
-							PoolId:        1,
+							PoolID:        1,
 							TokenOutDenom: simapp.InvalidDenom,
 						},
 					},
@@ -94,7 +94,7 @@ func (suite *GammTestSuite) TestOnRecvSwapPacket() {
 					"ibc/CCC/NN",
 					[]types.SwapAmountInRoute{
 						{
-							PoolId:        1,
+							PoolID:        1,
 							TokenOutDenom: simapp.InvalidDenom,
 						},
 					},
@@ -140,7 +140,7 @@ func (suite *GammTestSuite) TestOnRecvSwapPacket() {
 				coinToSwapToB.Denom,
 				[]types.SwapAmountInRoute{
 					{
-						PoolId:        1,
+						PoolID:        1,
 						TokenOutDenom: swapDenomOut,
 					},
 				},

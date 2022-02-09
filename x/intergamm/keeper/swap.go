@@ -57,7 +57,7 @@ func (k Keeper) MultihopSwapExactAmountIn(
 			_outMinAmount = tokenOutMinAmount
 		}
 
-		tokenOutAmount, _, err = k.gammKeeper.SwapExactAmountIn(ctx, sender, route.PoolId, tokenIn, route.TokenOutDenom, _outMinAmount)
+		tokenOutAmount, _, err = k.gammKeeper.SwapExactAmountIn(ctx, sender, route.PoolID, tokenIn, route.TokenOutDenom, _outMinAmount)
 		if err != nil {
 			return sdk.Int{}, "", err
 		}

@@ -18,13 +18,13 @@ func (k Keeper) OnRecvJoinPoolPacket(ctx sdk.Context, packet channeltypes.Packet
 	tokenIn, _ := types.ParseTokenOnRcv(packet.GetDestPort(), packet.GetDestChannel(), amount, denom)
 
 	// Swap tokens
-	tokenOutAmount, err := k.gammKeeper.JoinSwapExternAmountIn(ctx, sender, data.PoolId, tokenIn, data.ShareOutMinAmount)
+	tokenOutAmount, err := k.gammKeeper.JoinSwapExternAmountIn(ctx, sender, data.PoolID, tokenIn, data.ShareOutMinAmount)
 	if err != nil {
 		return packetAck, err
 	}
 
 	// Send tokens output to source chain
-	tokenOutDenom := types.GetPoolShareDenom(data.PoolId)
+	tokenOutDenom := types.GetPoolShareDenom(data.PoolID)
 	tokenTransferOut := sdk.NewCoin(tokenOutDenom, tokenOutAmount)
 	// TODO: Validate outDenom IBC
 
