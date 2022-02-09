@@ -28,11 +28,28 @@ func NewIbcJoinPoolPacketData(sender, receiver, amount, denom string, poolID uin
 		Denom:    denom,
 		Sender:   sender,
 		Receiver: receiver,
-		Gamm: &IbcPacketData_Liquidity{
-			Liquidity: &JoinPoolPacketData{
+		Gamm: &IbcPacketData_JoinPool{
+			JoinPool: &JoinPoolPacketData{
 				Sender:            sender,
 				PoolId:            poolID,
 				ShareOutMinAmount: shareOutMinAmount,
+			},
+		},
+	}
+}
+
+// NewIbcJoinPoolPacketData contructs a new IbcPacketData instance with JoinPool msg
+func NewIbcExitPoolPacketData(sender, receiver, amount, denom string, tokenOutDenom string, tokenOutMinAmount sdk.Int) IbcPacketData {
+	return IbcPacketData{
+		Amount:   amount,
+		Denom:    denom,
+		Sender:   sender,
+		Receiver: receiver,
+		Gamm: &IbcPacketData_ExitPool{
+			ExitPool: &ExitPoolPacketData{
+				Sender:            sender,
+				TokenOutDenom:     tokenOutDenom,
+				TokenOutMinAmount: tokenOutMinAmount,
 			},
 		},
 	}

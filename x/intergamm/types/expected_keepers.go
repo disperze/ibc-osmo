@@ -51,4 +51,13 @@ type GammKeeper interface {
 		tokenIn sdk.Coin,
 		shareOutMinAmount sdk.Int,
 	) (shareOutAmount sdk.Int, err error)
+
+	ExitSwapShareAmountIn(
+		ctx sdk.Context,
+		sender sdk.AccAddress,
+		poolId uint64,
+		tokenOutDenom string,
+		shareInAmount sdk.Int,
+		tokenOutMinAmount sdk.Int,
+	) (tokenOutAmount sdk.Int, err error)
 }

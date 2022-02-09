@@ -60,6 +60,17 @@ func (s SwapKeeperTest) JoinSwapExternAmountIn(
 	return
 }
 
+func (s SwapKeeperTest) ExitSwapShareAmountIn(
+	ctx sdk.Context,
+	sender sdk.AccAddress,
+	poolId uint64,
+	tokenOutDenom string,
+	shareInAmount sdk.Int,
+	tokenOutMinAmount sdk.Int,
+) (tokenOutAmount sdk.Int, err error) {
+	return
+}
+
 func (s SwapKeeperTest) ReceiveAndMintTokens(
 	ctx sdk.Context,
 	sender sdk.AccAddress,

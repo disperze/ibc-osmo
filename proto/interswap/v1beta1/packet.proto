@@ -19,7 +19,8 @@ message IbcPacketData {
   oneof gamm {
       NoData noData = 5;
       SwapExactAmountInPacketData swap = 6;
-      JoinPoolPacketData liquidity = 7;
+      JoinPoolPacketData join_pool = 7;
+      ExitPoolPacketData exit_pool = 8;
   }
 }
 
@@ -56,8 +57,24 @@ message JoinPoolPacketData {
   ];
 }
 
-// SwapExactAmountInAck defines a struct for the swap packet acknowledgment
+// JoinPoolAck defines a struct for the join pool packet acknowledgment
 message JoinPoolAck {
+  string denom = 1;
+  string amount = 2;
+}
+
+// ExitPoolPacketData allow gamm MsgExitSwapShareAmountIn  
+message ExitPoolPacketData {
+  string sender = 1;
+  string token_out_denom = 2;
+  string token_out_min_amount = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// ExitPoolAck defines a struct for the exit pool packet acknowledgment
+message ExitPoolAck {
   string denom = 1;
   string amount = 2;
 }

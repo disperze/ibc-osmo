@@ -129,8 +129,27 @@ func (am AppModule) OnRecvPacket(
 			),
 		)
 
-	case *types.IbcPacketData_Liquidity:
-		packetAck, err := am.keeper.OnRecvJoinPoolPacket(ctx, packet, receiver, newData.Amount, newData.Denom, *packetData.Liquidity)
+	case *types.IbcPacketData_JoinPool:
+		packetAck, err := am.keeper.OnRecvJoinPoolPacket(ctx, packet, receiver, newData.Amount, newData.Denom, *packetData.JoinPool)
+		if err != nil {
+			ack = channeltypes.NewErrorAcknowledgement(err.Error())
+		} else {
+			// Encode packet acknowledgment
+			packetAckBytes, err := types.ModuleCdc.MarshalJSON(&packetAck)
+			if err != nil {
+				return channeltypes.NewErrorAcknowledgement(sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error()).Error())
+			}
+			ack = channeltypes.NewResultAcknowledgement(sdk.MustSortJSON(packetAckBytes))
+		}
+		ctx.EventManager().EmitEvent(
+			sdk.NewEvent(
+				types.EventTypeJoinPoolPacket,
+				sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+				sdk.NewAttribute(types.AttributeKeyAckSuccess, fmt.Sprintf("%t", err != nil)),
+			),
+		)
+	case *types.IbcPacketData_ExitPool:
+		packetAck, err := am.keeper.OnRecvExitPoolPacket(ctx, packet, receiver, newData.Amount, newData.Denom, *packetData.ExitPool)
 		if err != nil {
 			ack = channeltypes.NewErrorAcknowledgement(err.Error())
 		} else {
