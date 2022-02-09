@@ -44,7 +44,7 @@ func NewInterGammPath(chainA, chainB *ibctesting.TestChain) *ibctesting.Path {
 
 // constructs a send from chainA to chainB on the established channel/connection
 // and sends the same coin back from chainB to chainA.
-func (suite *GammTestSuite) TestOnRecvPacket() {
+func (suite *GammTestSuite) TestOnRecvSwapPacket() {
 	var packetData []byte
 	testCases := []struct {
 		name          string
@@ -56,7 +56,7 @@ func (suite *GammTestSuite) TestOnRecvPacket() {
 		},
 		{
 			"invalid routes", func() {
-				swapTokenPacket := types.NewIbcPacketData(
+				swapTokenPacket := types.NewIbcSwapPacketData(
 					suite.chainA.SenderAccount.GetAddress().String(),
 					suite.chainB.SenderAccount.GetAddress().String(),
 					"100",
@@ -69,7 +69,7 @@ func (suite *GammTestSuite) TestOnRecvPacket() {
 		},
 		{
 			"invalid denom out", func() {
-				swapTokenPacket := types.NewIbcPacketData(
+				swapTokenPacket := types.NewIbcSwapPacketData(
 					suite.chainA.SenderAccount.GetAddress().String(),
 					suite.chainB.SenderAccount.GetAddress().String(),
 					"100",
@@ -133,7 +133,7 @@ func (suite *GammTestSuite) TestOnRecvPacket() {
 			suite.Require().True(ok)
 			coinToSwapToB := sdk.NewCoin(sdk.DefaultBondDenom, amountToSwap)
 
-			swapTokenPacket := types.NewIbcPacketData(
+			swapTokenPacket := types.NewIbcSwapPacketData(
 				suite.chainA.SenderAccount.GetAddress().String(),
 				suite.chainB.SenderAccount.GetAddress().String(),
 				coinToSwapToB.Amount.String(),

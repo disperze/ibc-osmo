@@ -5,7 +5,7 @@ import (
 )
 
 // NewIbcPacketData contructs a new IbcPacketData instance
-func NewIbcPacketData(sender, receiver, amount, denom string, routes []SwapAmountInRoute, tokenOut sdk.Int) IbcPacketData {
+func NewIbcSwapPacketData(sender, receiver, amount, denom string, routes []SwapAmountInRoute, tokenOut sdk.Int) IbcPacketData {
 	return IbcPacketData{
 		Amount:   amount,
 		Denom:    denom,
@@ -21,17 +21,24 @@ func NewIbcPacketData(sender, receiver, amount, denom string, routes []SwapAmoun
 	}
 }
 
-// GetBytes is a helper for serialising
-func (gpd IbcPacketData) GetBytes() []byte {
-	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&gpd))
+// NewIbcJoinPoolPacketData contructs a new IbcPacketData instance with JoinPool msg
+func NewIbcJoinPoolPacketData(sender, receiver, amount, denom string, poolID uint64, shareOutMinAmount sdk.Int) IbcPacketData {
+	return IbcPacketData{
+		Amount:   amount,
+		Denom:    denom,
+		Sender:   sender,
+		Receiver: receiver,
+		Gamm: &IbcPacketData_Liquidity{
+			Liquidity: &JoinPoolPacketData{
+				Sender:            sender,
+				PoolId:            poolID,
+				ShareOutMinAmount: shareOutMinAmount,
+			},
+		},
+	}
 }
 
 // GetBytes is a helper for serialising
-func (gpd IbcPacketData) GetSafeBytes() ([]byte, error) {
-	bz, err := ModuleCdc.MarshalJSON(&gpd)
-	if err != nil {
-		return nil, err
-	}
-
-	return sdk.SortJSON(bz)
+func (gpd IbcPacketData) GetBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(&gpd))
 }

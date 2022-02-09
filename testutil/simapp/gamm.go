@@ -54,8 +54,8 @@ func (s SwapKeeperTest) JoinSwapExternAmountIn(
 ) (shareOutAmount sdk.Int, err error) {
 
 	tokenOutDenom := ibcgammkeeper.GetPoolShareDenom(poolId)
-	shareOutAmount = tokenIn.Amount
-	tokenOut := sdk.NewCoin(tokenOutDenom, tokenIn.Amount)
+	shareOutAmount = shareOutMinAmount
+	tokenOut := sdk.NewCoin(tokenOutDenom, shareOutAmount)
 	err = s.ReceiveAndMintTokens(ctx, sender, tokenIn, tokenOut)
 
 	return
