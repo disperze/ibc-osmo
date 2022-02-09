@@ -10,7 +10,7 @@ import (
 )
 
 // OnRecvSwapPacket processes packet reception
-func (k Keeper) OnRecvSwapPacket(ctx sdk.Context, packet channeltypes.Packet, sender sdk.AccAddress, amount, denom string, data types.SwapExactAmountInPacketData) (packetAck types.SwapExactAmountInAck, err error) {
+func (k Keeper) OnRecvSwapPacket(ctx sdk.Context, packet channeltypes.Packet, sender sdk.AccAddress, amount, denom string, data types.SwapExactAmountInPacketData) (packetAck types.IbcTokenAck, err error) {
 	// validate packet data upon receiving
 	if err := data.ValidateBasic(); err != nil {
 		return packetAck, err

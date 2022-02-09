@@ -192,7 +192,7 @@ func (suite *GammTestSuite) TestOnRecvSwapPacket() {
 			suite.Require().Equal(tc.expAckSuccess, isSuccess)
 
 			if tc.expAckSuccess {
-				var swapOut types.SwapExactAmountInAck
+				var swapOut types.IbcTokenAck
 				err = types.ModuleCdc.UnmarshalJSON(res.Result, &swapOut)
 				suite.Require().NoError(err)
 

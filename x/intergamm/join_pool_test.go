@@ -108,7 +108,7 @@ func (suite *GammTestSuite) TestOnRecvJoinPoolPacket() {
 			suite.Require().Equal(tc.expAckSuccess, isSuccess)
 
 			if tc.expAckSuccess {
-				var shares types.JoinPoolAck
+				var shares types.IbcTokenAck
 				err = types.ModuleCdc.UnmarshalJSON(res.Result, &shares)
 				suite.Require().NoError(err)
 
@@ -207,7 +207,7 @@ func (suite *GammTestSuite) TestOnRecvExitPoolPacket() {
 			suite.Require().Equal(tc.expAckSuccess, isSuccess)
 
 			if tc.expAckSuccess {
-				var shares types.ExitPoolAck
+				var shares types.IbcTokenAck
 				err = types.ModuleCdc.UnmarshalJSON(res.Result, &shares)
 				suite.Require().NoError(err)
 

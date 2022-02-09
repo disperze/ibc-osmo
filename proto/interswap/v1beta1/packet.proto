@@ -41,12 +41,6 @@ message SwapExactAmountInPacketData {
   ];
 }
 
-// SwapExactAmountInAck defines a struct for the swap packet acknowledgment
-message SwapExactAmountInAck {
-	string denom = 1;
-  string amount = 2;
-}
-
 // JoinPoolPacketData allow gamm MsgJoinSwapExternAmountIn 
 message JoinPoolPacketData {
   string sender = 1;
@@ -55,12 +49,6 @@ message JoinPoolPacketData {
     (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
     (gogoproto.nullable) = false
   ];
-}
-
-// JoinPoolAck defines a struct for the join pool packet acknowledgment
-message JoinPoolAck {
-  string denom = 1;
-  string amount = 2;
 }
 
 // ExitPoolPacketData allow gamm MsgExitSwapShareAmountIn  
@@ -73,8 +61,8 @@ message ExitPoolPacketData {
   ];
 }
 
-// ExitPoolAck defines a struct for the exit pool packet acknowledgment
-message ExitPoolAck {
+// ExitPoolAck defines a struct for the token packet acknowledgment
+message IbcTokenAck {
   string denom = 1;
   string amount = 2;
 }

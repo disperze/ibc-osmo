@@ -8,7 +8,7 @@ import (
 )
 
 // OnRecvJoinPoolPacket processes JoinPool packet
-func (k Keeper) OnRecvJoinPoolPacket(ctx sdk.Context, packet channeltypes.Packet, sender sdk.AccAddress, amount, denom string, data types.JoinPoolPacketData) (packetAck types.JoinPoolAck, err error) {
+func (k Keeper) OnRecvJoinPoolPacket(ctx sdk.Context, packet channeltypes.Packet, sender sdk.AccAddress, amount, denom string, data types.JoinPoolPacketData) (packetAck types.IbcTokenAck, err error) {
 	// validate packet data upon receiving
 	if err := data.ValidateBasic(); err != nil {
 		return packetAck, err
@@ -46,7 +46,7 @@ func (k Keeper) OnRecvJoinPoolPacket(ctx sdk.Context, packet channeltypes.Packet
 }
 
 // OnRecvExitPoolPacket processes ExitPool packet
-func (k Keeper) OnRecvExitPoolPacket(ctx sdk.Context, packet channeltypes.Packet, sender sdk.AccAddress, amount, denom string, data types.ExitPoolPacketData) (packetAck types.ExitPoolAck, err error) {
+func (k Keeper) OnRecvExitPoolPacket(ctx sdk.Context, packet channeltypes.Packet, sender sdk.AccAddress, amount, denom string, data types.ExitPoolPacketData) (packetAck types.IbcTokenAck, err error) {
 	// validate packet data upon receiving
 	if err := data.ValidateBasic(); err != nil {
 		return packetAck, err
