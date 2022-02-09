@@ -85,6 +85,36 @@ func (suite *GammTestSuite) TestOnRecvPacket() {
 				packetData = swapTokenPacket.GetBytes()
 			}, false,
 		},
+		{
+			"invalid denom in", func() {
+				swapTokenPacket := types.NewIbcPacketData(
+					suite.chainA.SenderAccount.GetAddress().String(),
+					suite.chainB.SenderAccount.GetAddress().String(),
+					"100",
+					"ibc/CCC/NN",
+					[]types.SwapAmountInRoute{
+						{
+							PoolId:        1,
+							TokenOutDenom: simapp.InvalidDenom,
+						},
+					},
+					sdk.OneInt(),
+				)
+				packetData = swapTokenPacket.GetBytes()
+			}, false,
+		},
+		{
+			"invalid gamm action", func() {
+				swapTokenPacket := types.IbcPacketData{
+					Amount:   "100",
+					Denom:    sdk.DefaultBondDenom,
+					Sender:   suite.chainA.SenderAccount.GetAddress().String(),
+					Receiver: suite.chainB.SenderAccount.GetAddress().String(),
+					Gamm:     &types.IbcPacketData_NoData{},
+				}
+				packetData = swapTokenPacket.GetBytes()
+			}, false,
+		},
 	}
 
 	for _, tc := range testCases {
