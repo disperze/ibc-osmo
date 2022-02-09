@@ -88,7 +88,8 @@ func (am AppModule) OnRecvPacket(
 	relayer sdk.AccAddress,
 ) ibcexported.Acknowledgement {
 	var modulePacketData types.IbcPacketData
-	if err := types.ModuleCdc.UnmarshalJSON(packet.GetData(), &modulePacketData); err != nil {
+	// uses custom UnmarshalJSON to allow messages from another middleware module
+	if err := types.SafeUnmarshalJSON(types.ModuleCdc, packet.GetData(), &modulePacketData); err != nil {
 		return channeltypes.NewErrorAcknowledgement(sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal packet data: %s", err.Error()).Error())
 	}
 
