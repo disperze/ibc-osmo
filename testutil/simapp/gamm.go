@@ -5,25 +5,12 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	ibcgammtypes "github.com/disperze/ibc-osmo/x/intergamm/types"
 	ibcswaptypes "github.com/disperze/ibc-osmo/x/interswap/types"
 )
 
-var _ ibcgammtypes.GammKeeper = (*GammKeeperTest)(nil)
 var _ ibcswaptypes.GammKeeper = (*SwapKeeperTest)(nil)
 
 const InvalidDenom = "n/a"
-
-type GammKeeperTest struct {
-}
-
-func NewGammKeeperTest() *GammKeeperTest {
-	return &GammKeeperTest{}
-}
-
-func (gamm GammKeeperTest) CalculateSpotPrice(ctx sdk.Context, poolId uint64, tokenInDenom, tokenOutDenom string) (sdk.Dec, error) {
-	return sdk.NewDec(1), nil
-}
 
 type SwapKeeperTest struct {
 	bankKeeper bankkeeper.Keeper
