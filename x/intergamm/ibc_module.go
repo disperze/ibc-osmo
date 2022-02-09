@@ -111,62 +111,16 @@ func (am AppModule) OnRecvPacket(
 	switch packetData := modulePacketData.Gamm.(type) {
 	case *types.IbcPacketData_Swap:
 		packetAck, err := am.keeper.OnRecvSwapPacket(ctx, packet, receiver, newData.Amount, newData.Denom, *packetData.Swap)
-		if err != nil {
-			ack = channeltypes.NewErrorAcknowledgement(err.Error())
-		} else {
-			// Encode packet acknowledgment
-			packetAckBytes, err := types.ModuleCdc.MarshalJSON(&packetAck)
-			if err != nil {
-				return channeltypes.NewErrorAcknowledgement(sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error()).Error())
-			}
-			ack = channeltypes.NewResultAcknowledgement(sdk.MustSortJSON(packetAckBytes))
-		}
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				types.EventTypeSwapPacket,
-				sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-				sdk.NewAttribute(types.AttributeKeyAckSuccess, fmt.Sprintf("%t", err != nil)),
-			),
-		)
+		ack = processAck(ctx, types.EventTypeSwapPacket, packetAck, err)
 
 	case *types.IbcPacketData_JoinPool:
 		packetAck, err := am.keeper.OnRecvJoinPoolPacket(ctx, packet, receiver, newData.Amount, newData.Denom, *packetData.JoinPool)
-		if err != nil {
-			ack = channeltypes.NewErrorAcknowledgement(err.Error())
-		} else {
-			// Encode packet acknowledgment
-			packetAckBytes, err := types.ModuleCdc.MarshalJSON(&packetAck)
-			if err != nil {
-				return channeltypes.NewErrorAcknowledgement(sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error()).Error())
-			}
-			ack = channeltypes.NewResultAcknowledgement(sdk.MustSortJSON(packetAckBytes))
-		}
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				types.EventTypeJoinPoolPacket,
-				sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-				sdk.NewAttribute(types.AttributeKeyAckSuccess, fmt.Sprintf("%t", err != nil)),
-			),
-		)
+		ack = processAck(ctx, types.EventTypeJoinPoolPacket, packetAck, err)
+
 	case *types.IbcPacketData_ExitPool:
 		packetAck, err := am.keeper.OnRecvExitPoolPacket(ctx, packet, receiver, newData.Amount, newData.Denom, *packetData.ExitPool)
-		if err != nil {
-			ack = channeltypes.NewErrorAcknowledgement(err.Error())
-		} else {
-			// Encode packet acknowledgment
-			packetAckBytes, err := types.ModuleCdc.MarshalJSON(&packetAck)
-			if err != nil {
-				return channeltypes.NewErrorAcknowledgement(sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error()).Error())
-			}
-			ack = channeltypes.NewResultAcknowledgement(sdk.MustSortJSON(packetAckBytes))
-		}
-		ctx.EventManager().EmitEvent(
-			sdk.NewEvent(
-				types.EventTypeJoinPoolPacket,
-				sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
-				sdk.NewAttribute(types.AttributeKeyAckSuccess, fmt.Sprintf("%t", err != nil)),
-			),
-		)
+		ack = processAck(ctx, types.EventTypeExitPoolPacket, packetAck, err)
+
 	default:
 		errMsg := fmt.Sprintf("unrecognized %s packet type: %T", types.ModuleName, packet)
 		return channeltypes.NewErrorAcknowledgement(errMsg)
@@ -205,4 +159,27 @@ func (am AppModule) NegotiateAppVersion(
 	proposedVersion string,
 ) (version string, err error) {
 	return am.app.NegotiateAppVersion(ctx, order, connectionID, portID, counterparty, proposedVersion)
+}
+
+func processAck(ctx sdk.Context, eventType string, packetAck types.IbcTokenAck, err error) (ack channeltypes.Acknowledgement) {
+	if err != nil {
+		ack = channeltypes.NewErrorAcknowledgement(err.Error())
+	} else {
+		// Encode packet acknowledgment
+		packetAckBytes, err := types.ModuleCdc.MarshalJSON(&packetAck)
+		if err != nil {
+			return channeltypes.NewErrorAcknowledgement(sdkerrors.Wrap(sdkerrors.ErrJSONMarshal, err.Error()).Error())
+		}
+		ack = channeltypes.NewResultAcknowledgement(sdk.MustSortJSON(packetAckBytes))
+	}
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			eventType,
+			sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
+			sdk.NewAttribute(types.AttributeKeyAckSuccess, fmt.Sprintf("%t", err != nil)),
+		),
+	)
+
+	return
 }
