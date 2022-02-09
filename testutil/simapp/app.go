@@ -334,7 +334,7 @@ func NewSimApp(
 
 	app.ibcgammKeeper = ibcgammkeeper.NewKeeper(
 		appCodec, keys[ibcgammtypes.StoreKey], app.TransferKeeper,
-		app.AccountKeeper, NewSwapKeeperTest(app.BankKeeper, ibctransfertypes.ModuleName),
+		NewSwapKeeperTest(app.BankKeeper, ibctransfertypes.ModuleName),
 	)
 	gammModule := ibcgamm.NewAppModule(app.ibcgammKeeper, transferModule)
 

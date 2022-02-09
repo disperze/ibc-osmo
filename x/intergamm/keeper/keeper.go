@@ -12,23 +12,19 @@ type Keeper struct {
 	storeKey sdk.StoreKey
 
 	transferKeeper types.TransferKeeper
-
-	authKeeper types.AccountKeeper
-	gammKeeper types.GammKeeper
+	gammKeeper     types.GammKeeper
 }
 
 func NewKeeper(
 	cdc codec.BinaryCodec,
 	storeKey sdk.StoreKey,
 	transferKeeper types.TransferKeeper,
-	authKeeper types.AccountKeeper,
 	gammKeeper types.GammKeeper,
 ) Keeper {
 	return Keeper{
 		cdc:            cdc,
 		storeKey:       storeKey,
 		transferKeeper: transferKeeper,
-		authKeeper:     authKeeper,
 		gammKeeper:     gammKeeper,
 	}
 }

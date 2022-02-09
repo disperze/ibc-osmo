@@ -8,11 +8,6 @@ import (
 	ibcexported "github.com/cosmos/ibc-go/v2/modules/core/exported"
 )
 
-// AccountKeeper defines the contract required for account APIs.
-type AccountKeeper interface {
-	GetModuleAddress(name string) sdk.AccAddress
-}
-
 // ChannelKeeper defines the expected IBC channel keeper
 type ChannelKeeper interface {
 	GetChannel(ctx sdk.Context, srcPort, srcChan string) (channel channeltypes.Channel, found bool)
