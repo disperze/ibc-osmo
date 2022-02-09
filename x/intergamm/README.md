@@ -2,9 +2,7 @@
 
 This is a middleware module around [ICS20 transfer module](https://github.com/cosmos/ibc-go/tree/v2.0.3/modules/apps/transfer) to allow executing custom transactions (ex: swap) on osmosis chain.
 
-## IBC Swap
-
-### IbcPacketData
+## IbcPacketData
 
 Data packet sent by a blockchain to Osmosis chain to make custom transaction. It contains the following parameters:
 
@@ -29,9 +27,31 @@ Allows to make swap transaction on Osmosis chain, uses `TokenIn` from ICS20 data
 | TokenOutMinAmount | string        | Min output amount                                 |
 
 
-## SwapExactAmountInAck
+### JoinPoolPacketData
 
-Returns the swap result
+Allows to make join-pool transaction on Osmosis chain, uses `TokenIn` from ICS20 data.
+
+| Parameter         | Type     |              Description                          |
+| ----------------- | -------- | ------------------------------------------------- |
+| Sender            | string   | Sender, useful for the caller                     |
+| PoolID            | unit64   | Pool asset ID                                     |
+| ShareOutMinAmount | string   | Min share output amount                           |
+
+
+### ExitPoolPacketData
+
+Allows to make exit-pool transaction on Osmosis chain, uses `TokenIn` from ICS20 data.
+
+| Parameter         | Type     |              Description                          |
+| ----------------- | -------- | ------------------------------------------------- |
+| Sender            | string   | Sender, useful for the caller                     |
+| TokenOutDenom     | string   | Asset denom                                       |
+| TokenOutMinAmount | string   | Min output amount                                 |
+
+
+## IbcTokenAck
+
+Returns the tokenOut result
 
 | Parameter      | Type      | 
 | -------------- | --------- | 
