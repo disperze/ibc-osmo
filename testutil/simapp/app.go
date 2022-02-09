@@ -332,7 +332,7 @@ func NewSimApp(
 		&stakingKeeper, govRouter,
 	)
 
-	ics4Wrapper := ibcswapkeeper.NewSwapICS4Wrapper(app.IBCKeeper.ChannelKeeper, &app.IbcSwapKeeper)
+	ics4Wrapper := ibcswapkeeper.NewSwapICS4Wrapper(app.IBCKeeper.ChannelKeeper)
 	// Create Transfer Keepers
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
 		appCodec, keys[ibctransfertypes.StoreKey], app.GetSubspace(ibctransfertypes.ModuleName),
@@ -347,7 +347,10 @@ func NewSimApp(
 	)
 	ibcGammModule := ibcgamm.NewAppModule(app.IbcGammKeeper)
 
-	app.IbcSwapKeeper = ibcswapkeeper.NewKeeper(appCodec, keys[ibcswaptypes.StoreKey], app.TransferKeeper, app.AccountKeeper, NewSwapKeeperTest())
+	app.IbcSwapKeeper = ibcswapkeeper.NewKeeper(
+		appCodec, keys[ibcswaptypes.StoreKey], app.TransferKeeper,
+		app.AccountKeeper, NewSwapKeeperTest(app.BankKeeper, ibctransfertypes.ModuleName),
+	)
 	swapModule := ibcswap.NewAppModule(app.IbcSwapKeeper, transferModule)
 
 	// NOTE: the IBC mock keeper and application module is used only for testing core IBC. Do
