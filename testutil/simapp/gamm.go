@@ -68,6 +68,12 @@ func (s SwapKeeperTest) ExitSwapShareAmountIn(
 	shareInAmount sdk.Int,
 	tokenOutMinAmount sdk.Int,
 ) (tokenOutAmount sdk.Int, err error) {
+	tokenInDenom := ibcgammtypes.GetPoolShareDenom(poolId)
+	tokenIn := sdk.NewCoin(tokenInDenom, shareInAmount)
+	tokenOutAmount = tokenOutMinAmount
+	tokenOut := sdk.NewCoin(tokenOutDenom, tokenOutAmount)
+	err = s.ReceiveAndMintTokens(ctx, sender, tokenIn, tokenOut)
+
 	return
 }
 
