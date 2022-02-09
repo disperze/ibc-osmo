@@ -43,4 +43,12 @@ type GammKeeper interface {
 		tokenOutDenom string,
 		tokenOutMinAmount sdk.Int,
 	) (tokenOutAmount sdk.Int, spotPriceAfter sdk.Dec, err error)
+
+	JoinSwapExternAmountIn(
+		ctx sdk.Context,
+		sender sdk.AccAddress,
+		poolId uint64,
+		tokenIn sdk.Coin,
+		shareOutMinAmount sdk.Int,
+	) (shareOutAmount sdk.Int, err error)
 }

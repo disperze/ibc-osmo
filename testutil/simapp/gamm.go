@@ -5,6 +5,7 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
+	ibcgammkeeper "github.com/disperze/ibc-osmo/x/intergamm/keeper"
 	ibcgammtypes "github.com/disperze/ibc-osmo/x/intergamm/types"
 )
 
@@ -34,13 +35,44 @@ func (s SwapKeeperTest) SwapExactAmountIn(
 		err = fmt.Errorf("invalid out denom: %s", tokenOutDenom)
 		return
 	}
+	tokenOutAmount = tokenIn.Amount
+	tokenOut := sdk.NewCoin(tokenOutDenom, tokenOutAmount)
+	err = s.ReceiveAndMintTokens(ctx, sender, tokenIn, tokenOut)
+	if err != nil {
+		return
+	}
 
+	return tokenOutAmount, sdk.OneDec(), nil
+}
+
+func (s SwapKeeperTest) JoinSwapExternAmountIn(
+	ctx sdk.Context,
+	sender sdk.AccAddress,
+	poolId uint64,
+	tokenIn sdk.Coin,
+	shareOutMinAmount sdk.Int,
+) (shareOutAmount sdk.Int, err error) {
+
+	tokenOutDenom := ibcgammkeeper.GetPoolShareDenom(poolId)
+	shareOutAmount = tokenIn.Amount
+	tokenOut := sdk.NewCoin(tokenOutDenom, tokenIn.Amount)
+	err = s.ReceiveAndMintTokens(ctx, sender, tokenIn, tokenOut)
+
+	return
+}
+
+func (s SwapKeeperTest) ReceiveAndMintTokens(
+	ctx sdk.Context,
+	sender sdk.AccAddress,
+	tokenIn sdk.Coin,
+	tokenOut sdk.Coin,
+) (err error) {
 	err = s.bankKeeper.SendCoinsFromAccountToModule(ctx, sender, s.moduleName, sdk.NewCoins(tokenIn))
 	if err != nil {
 		return
 	}
 
-	tokensOut := sdk.NewCoins(sdk.NewCoin(tokenOutDenom, tokenIn.Amount))
+	tokensOut := sdk.NewCoins(tokenOut)
 	err = s.bankKeeper.MintCoins(ctx, s.moduleName, tokensOut)
 	if err != nil {
 		return
@@ -51,5 +83,5 @@ func (s SwapKeeperTest) SwapExactAmountIn(
 		return
 	}
 
-	return tokenIn.Amount, sdk.OneDec(), nil
+	return nil
 }

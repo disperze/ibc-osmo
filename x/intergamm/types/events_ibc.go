@@ -2,7 +2,8 @@ package types
 
 // IBC events
 const (
-	EventTypeSwapPacket = "swap_packet"
+	EventTypeSwapPacket     = "swap_packet"
+	EventTypeJoinPoolPacket = "liquidity_packet"
 
 	AttributeKeyAckSuccess = "success"
 	AttributeKeyAck        = "acknowledgement"
