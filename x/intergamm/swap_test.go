@@ -87,7 +87,7 @@ func (suite *GammTestSuite) TestOnRecvSwapPacket() {
 		},
 		{
 			"invalid denom in", func() {
-				swapTokenPacket := types.NewIbcPacketData(
+				swapTokenPacket := types.NewIbcSwapPacketData(
 					suite.chainA.SenderAccount.GetAddress().String(),
 					suite.chainB.SenderAccount.GetAddress().String(),
 					"100",
