@@ -6,10 +6,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	capabilitytypes "github.com/cosmos/cosmos-sdk/x/capability/types"
+	transfertypes "github.com/cosmos/ibc-go/v2/modules/apps/transfer/types"
 	channeltypes "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
-	porttypes "github.com/cosmos/ibc-go/v2/modules/core/05-port/types"
-	host "github.com/cosmos/ibc-go/v2/modules/core/24-host"
 	ibcexported "github.com/cosmos/ibc-go/v2/modules/core/exported"
+
 	"github.com/disperze/ibc-osmo/x/intergamm/types"
 )
 
@@ -24,26 +24,8 @@ func (am AppModule) OnChanOpenInit(
 	counterparty channeltypes.Counterparty,
 	version string,
 ) error {
-	if order != channeltypes.UNORDERED {
-		return sdkerrors.Wrapf(channeltypes.ErrInvalidChannelOrdering, "expected %s channel, got %s ", channeltypes.UNORDERED, order)
-	}
-
-	// Require portID is the portID module is bound to
-	boundPort := am.keeper.GetPort(ctx)
-	if boundPort != portID {
-		return sdkerrors.Wrapf(porttypes.ErrInvalidPort, "invalid port: %s, expected %s", portID, boundPort)
-	}
-
-	if version != types.Version {
-		return sdkerrors.Wrapf(types.ErrInvalidVersion, "got %s, expected %s", version, types.Version)
-	}
-
-	// Claim channel capability passed back by IBC module
-	if err := am.keeper.ClaimCapability(ctx, chanCap, host.ChannelCapabilityPath(portID, channelID)); err != nil {
-		return err
-	}
-
-	return nil
+	return am.app.OnChanOpenInit(ctx, order, connectionHops, portID, channelID,
+		chanCap, counterparty, version)
 }
 
 // OnChanOpenTry implements the IBCModule interface
@@ -58,36 +40,8 @@ func (am AppModule) OnChanOpenTry(
 	version,
 	counterpartyVersion string,
 ) error {
-	if order != channeltypes.UNORDERED {
-		return sdkerrors.Wrapf(channeltypes.ErrInvalidChannelOrdering, "expected %s channel, got %s ", channeltypes.UNORDERED, order)
-	}
-
-	// Require portID is the portID module is bound to
-	boundPort := am.keeper.GetPort(ctx)
-	if boundPort != portID {
-		return sdkerrors.Wrapf(porttypes.ErrInvalidPort, "invalid port: %s, expected %s", portID, boundPort)
-	}
-
-	if version != types.Version {
-		return sdkerrors.Wrapf(types.ErrInvalidVersion, "got: %s, expected %s", version, types.Version)
-	}
-
-	if counterpartyVersion != types.Version {
-		return sdkerrors.Wrapf(types.ErrInvalidVersion, "invalid counterparty version: got: %s, expected %s", counterpartyVersion, types.Version)
-	}
-
-	// Module may have already claimed capability in OnChanOpenInit in the case of crossing hellos
-	// (ie chainA and chainB both call ChanOpenInit before one of them calls ChanOpenTry)
-	// If module can already authenticate the capability then module already owns it so we don't need to claim
-	// Otherwise, module does not have channel capability and we must claim it from IBC
-	if !am.keeper.AuthenticateCapability(ctx, chanCap, host.ChannelCapabilityPath(portID, channelID)) {
-		// Only claim channel capability passed back by IBC module if we do not already own it
-		if err := am.keeper.ClaimCapability(ctx, chanCap, host.ChannelCapabilityPath(portID, channelID)); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return am.app.OnChanOpenTry(ctx, order, connectionHops, portID, channelID,
+		chanCap, counterparty, version, counterpartyVersion)
 }
 
 // OnChanOpenAck implements the IBCModule interface
@@ -97,10 +51,7 @@ func (am AppModule) OnChanOpenAck(
 	channelID string,
 	counterpartyVersion string,
 ) error {
-	if counterpartyVersion != types.Version {
-		return sdkerrors.Wrapf(types.ErrInvalidVersion, "invalid counterparty version: %s, expected %s", counterpartyVersion, types.Version)
-	}
-	return nil
+	return am.app.OnChanOpenAck(ctx, portID, channelID, counterpartyVersion)
 }
 
 // OnChanOpenConfirm implements the IBCModule interface
@@ -109,7 +60,7 @@ func (am AppModule) OnChanOpenConfirm(
 	portID,
 	channelID string,
 ) error {
-	return nil
+	return am.app.OnChanOpenConfirm(ctx, portID, channelID)
 }
 
 // OnChanCloseInit implements the IBCModule interface
@@ -118,8 +69,7 @@ func (am AppModule) OnChanCloseInit(
 	portID,
 	channelID string,
 ) error {
-	// Disallow user-initiated channel closing for channels
-	return sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "user cannot close channel")
+	return am.app.OnChanCloseInit(ctx, portID, channelID)
 }
 
 // OnChanCloseConfirm implements the IBCModule interface
@@ -128,26 +78,39 @@ func (am AppModule) OnChanCloseConfirm(
 	portID,
 	channelID string,
 ) error {
-	return nil
+	return am.app.OnChanCloseConfirm(ctx, portID, channelID)
 }
 
 // OnRecvPacket implements the IBCModule interface
 func (am AppModule) OnRecvPacket(
 	ctx sdk.Context,
-	modulePacket channeltypes.Packet,
+	packet channeltypes.Packet,
 	relayer sdk.AccAddress,
 ) ibcexported.Acknowledgement {
-	var ack channeltypes.Acknowledgement
-
-	var modulePacketData types.GammPacketData
-	if err := types.ModuleCdc.UnmarshalJSON(modulePacket.GetData(), &modulePacketData); err != nil {
+	var modulePacketData types.IbcPacketData
+	// uses custom UnmarshalJSON to allow messages from another middleware module
+	if err := types.SafeUnmarshalJSON(types.ModuleCdc, packet.GetData(), &modulePacketData); err != nil {
 		return channeltypes.NewErrorAcknowledgement(sdkerrors.Wrapf(sdkerrors.ErrUnknownRequest, "cannot unmarshal packet data: %s", err.Error()).Error())
 	}
 
-	// Dispatch packet
-	switch packet := modulePacketData.Packet.(type) {
-	case *types.GammPacketData_SpotPrice:
-		packetAck, err := am.keeper.OnRecvSpotPricePacket(ctx, modulePacket, *packet.SpotPrice)
+	if modulePacketData.Gamm == nil {
+		return am.app.OnRecvPacket(ctx, packet, relayer)
+	}
+
+	receiver := types.GetFundAddress(packet.GetDestPort(), packet.GetDestChannel())
+	newData := transfertypes.NewFungibleTokenPacketData(modulePacketData.Denom, modulePacketData.Amount, modulePacketData.Sender, receiver.String())
+
+	newPacket := packet
+	newPacket.Data = newData.GetBytes()
+	ics20Ack := am.app.OnRecvPacket(ctx, newPacket, relayer)
+	if !ics20Ack.Success() {
+		return ics20Ack
+	}
+
+	var ack channeltypes.Acknowledgement
+	switch packetData := modulePacketData.Gamm.(type) {
+	case *types.IbcPacketData_Swap:
+		packetAck, err := am.keeper.OnRecvSwapPacket(ctx, packet, receiver, newData.Amount, newData.Denom, *packetData.Swap)
 		if err != nil {
 			ack = channeltypes.NewErrorAcknowledgement(err.Error())
 		} else {
@@ -160,7 +123,7 @@ func (am AppModule) OnRecvPacket(
 		}
 		ctx.EventManager().EmitEvent(
 			sdk.NewEvent(
-				types.EventTypeSpotPricePacket,
+				types.EventTypeSwapPacket,
 				sdk.NewAttribute(sdk.AttributeKeyModule, types.ModuleName),
 				sdk.NewAttribute(types.AttributeKeyAckSuccess, fmt.Sprintf("%t", err != nil)),
 			),
@@ -178,22 +141,20 @@ func (am AppModule) OnRecvPacket(
 // OnAcknowledgementPacket implements the IBCModule interface
 func (am AppModule) OnAcknowledgementPacket(
 	ctx sdk.Context,
-	modulePacket channeltypes.Packet,
+	packet channeltypes.Packet,
 	acknowledgement []byte,
 	relayer sdk.AccAddress,
 ) error {
-	errMsg := fmt.Sprintf("cannot cause a packet ack, module %s does not send a packet over the channel", types.ModuleName)
-	return sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
+	return am.app.OnAcknowledgementPacket(ctx, packet, acknowledgement, relayer)
 }
 
 // OnTimeoutPacket implements the IBCModule interface
 func (am AppModule) OnTimeoutPacket(
 	ctx sdk.Context,
-	modulePacket channeltypes.Packet,
+	packet channeltypes.Packet,
 	relayer sdk.AccAddress,
 ) error {
-	errMsg := fmt.Sprintf("cannot cause a packet timeout, module %s does not send a packet over the channel", types.ModuleName)
-	return sdkerrors.Wrap(sdkerrors.ErrUnknownRequest, errMsg)
+	return am.app.OnTimeoutPacket(ctx, packet, relayer)
 }
 
 // NegotiateAppVersion implements the IBCModule interface
@@ -205,5 +166,5 @@ func (am AppModule) NegotiateAppVersion(
 	counterparty channeltypes.Counterparty,
 	proposedVersion string,
 ) (version string, err error) {
-	return proposedVersion, nil
+	return am.app.NegotiateAppVersion(ctx, order, connectionID, portID, counterparty, proposedVersion)
 }

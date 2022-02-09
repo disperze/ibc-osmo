@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package ibcosmo.intergamm.v1beta1;
+
+import "gogoproto/gogo.proto";
+
+option go_package = "github.com/disperze/ibc-osmo/x/intergamm/types";
+
+message IbcPacketData {
+  // the token denomination to be transferred
+  string denom = 1;
+  // the token amount to be transferred
+  string amount = 2;
+  // the sender address
+  string sender = 3;
+  // the recipient address on the destination chain
+  string receiver = 4;
+  // the gamm action
+  oneof gamm {
+      NoData noData = 5;
+      SwapExactAmountInPacketData swap = 6;
+  }
+}
+
+message NoData {
+}
+
+message SwapAmountInRoute {
+  uint64 pool_id = 1;
+  string token_out_denom = 2;
+}
+
+message SwapExactAmountInPacketData {
+  string sender = 1;
+  repeated SwapAmountInRoute routes = 2 [ (gogoproto.nullable) = false ];
+  string token_out_min_amount = 3 [
+    (gogoproto.customtype) = "github.com/cosmos/cosmos-sdk/types.Int",
+    (gogoproto.nullable) = false
+  ];
+}
+
+// SwapExactAmountInAck defines a struct for the swap packet acknowledgment
+message SwapExactAmountInAck {
+	string denom = 1;
+  string amount = 2;
+}

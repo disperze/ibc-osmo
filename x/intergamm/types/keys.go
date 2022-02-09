@@ -1,5 +1,12 @@
 package types
 
+import (
+	"crypto/sha256"
+	"fmt"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
+
 const (
 	// ModuleName defines the module name
 	ModuleName = "intergamm"
@@ -12,19 +19,15 @@ const (
 
 	// QuerierRoute defines the module's query routing key
 	QuerierRoute = ModuleName
-
-	// Version defines the current version the IBC module supports
-	Version = "gamm-1"
-
-	// PortID is the default port id that module binds to
-	PortID = "gamm"
 )
 
-var (
-	// PortKey defines the key to store the port ID in store
-	PortKey = KeyPrefix("ibc-gamm-port-")
-)
+// GetFundAddress returns the fund address for the specified channel.
+func GetFundAddress(portID, channelID string) sdk.AccAddress {
+	contents := fmt.Sprintf("%s/%s", portID, channelID)
 
-func KeyPrefix(p string) []byte {
-	return []byte(p)
+	preImage := []byte(ModuleName)
+	preImage = append(preImage, 0)
+	preImage = append(preImage, contents...)
+	hash := sha256.Sum256(preImage)
+	return hash[:20]
 }

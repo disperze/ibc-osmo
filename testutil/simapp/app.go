@@ -191,14 +191,12 @@ type SimApp struct {
 	EvidenceKeeper   evidencekeeper.Keeper
 	TransferKeeper   ibctransferkeeper.Keeper
 	FeeGrantKeeper   feegrantkeeper.Keeper
+	ibcgammKeeper    ibcgammkeeper.Keeper
 
 	// make scoped keepers public for test purposes
 	ScopedIBCKeeper      capabilitykeeper.ScopedKeeper
 	ScopedTransferKeeper capabilitykeeper.ScopedKeeper
 	ScopedIBCMockKeeper  capabilitykeeper.ScopedKeeper
-
-	ScopedIbcGammKeeper capabilitykeeper.ScopedKeeper
-	IbcGammKeeper       ibcgammkeeper.Keeper
 
 	// the module manager
 	mm *module.Manager
@@ -240,7 +238,7 @@ func NewSimApp(
 		minttypes.StoreKey, distrtypes.StoreKey, slashingtypes.StoreKey,
 		govtypes.StoreKey, paramstypes.StoreKey, ibchost.StoreKey, upgradetypes.StoreKey, feegrant.StoreKey,
 		evidencetypes.StoreKey, ibctransfertypes.StoreKey, capabilitytypes.StoreKey,
-		authzkeeper.StoreKey, ibcgammtypes.ModuleName,
+		authzkeeper.StoreKey, ibcgammtypes.StoreKey,
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
 	memKeys := sdk.NewMemoryStoreKeys(capabilitytypes.MemStoreKey)
@@ -265,7 +263,6 @@ func NewSimApp(
 	app.CapabilityKeeper = capabilitykeeper.NewKeeper(appCodec, keys[capabilitytypes.StoreKey], memKeys[capabilitytypes.MemStoreKey])
 	scopedIBCKeeper := app.CapabilityKeeper.ScopeToModule(ibchost.ModuleName)
 	scopedTransferKeeper := app.CapabilityKeeper.ScopeToModule(ibctransfertypes.ModuleName)
-	scopedIbcGammKeeper := app.CapabilityKeeper.ScopeToModule(ibcgammtypes.ModuleName)
 	// NOTE: the IBC mock keeper and application module is used only for testing core IBC. Do
 	// note replicate if you do not need to test core IBC or light clients.
 	scopedIBCMockKeeper := app.CapabilityKeeper.ScopeToModule(ibcmock.ModuleName)
@@ -326,19 +323,20 @@ func NewSimApp(
 		&stakingKeeper, govRouter,
 	)
 
+	ics4Wrapper := ibcgammkeeper.NewSwapICS4Wrapper(app.IBCKeeper.ChannelKeeper)
 	// Create Transfer Keepers
 	app.TransferKeeper = ibctransferkeeper.NewKeeper(
 		appCodec, keys[ibctransfertypes.StoreKey], app.GetSubspace(ibctransfertypes.ModuleName),
-		app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper,
+		ics4Wrapper, &app.IBCKeeper.PortKeeper,
 		app.AccountKeeper, app.BankKeeper, scopedTransferKeeper,
 	)
 	transferModule := transfer.NewAppModule(app.TransferKeeper)
 
-	app.IbcGammKeeper = ibcgammkeeper.NewKeeper(
-		appCodec, keys[ibcgammtypes.StoreKey], app.IBCKeeper.ChannelKeeper, &app.IBCKeeper.PortKeeper,
-		scopedIbcGammKeeper, NewGammKeeperTest(),
+	app.ibcgammKeeper = ibcgammkeeper.NewKeeper(
+		appCodec, keys[ibcgammtypes.StoreKey], app.TransferKeeper,
+		NewSwapKeeperTest(app.BankKeeper, ibctransfertypes.ModuleName),
 	)
-	ibcGammModule := ibcgamm.NewAppModule(app.IbcGammKeeper)
+	gammModule := ibcgamm.NewAppModule(app.ibcgammKeeper, transferModule)
 
 	// NOTE: the IBC mock keeper and application module is used only for testing core IBC. Do
 	// note replicate if you do not need to test core IBC or light clients.
@@ -346,9 +344,8 @@ func NewSimApp(
 
 	// Create static IBC router, add transfer route, then set and seal it
 	ibcRouter := porttypes.NewRouter()
-	ibcRouter.AddRoute(ibctransfertypes.ModuleName, transferModule)
+	ibcRouter.AddRoute(ibctransfertypes.ModuleName, gammModule)
 	ibcRouter.AddRoute(ibcmock.ModuleName, mockModule)
-	ibcRouter.AddRoute(ibcgammtypes.ModuleName, ibcGammModule)
 	app.IBCKeeper.SetRouter(ibcRouter)
 
 	// create evidence keeper with router
@@ -389,7 +386,6 @@ func NewSimApp(
 		authzmodule.NewAppModule(appCodec, app.AuthzKeeper, app.AccountKeeper, app.BankKeeper, app.interfaceRegistry),
 		transferModule,
 		mockModule,
-		ibcGammModule,
 	)
 
 	// During begin block slashing happens after distr.BeginBlocker so that
@@ -412,7 +408,7 @@ func NewSimApp(
 		capabilitytypes.ModuleName, authtypes.ModuleName, banktypes.ModuleName, distrtypes.ModuleName, stakingtypes.ModuleName,
 		slashingtypes.ModuleName, govtypes.ModuleName, minttypes.ModuleName, crisistypes.ModuleName,
 		ibchost.ModuleName, genutiltypes.ModuleName, evidencetypes.ModuleName, authz.ModuleName, ibctransfertypes.ModuleName,
-		ibcmock.ModuleName, feegrant.ModuleName, ibcgammtypes.ModuleName,
+		ibcmock.ModuleName, feegrant.ModuleName,
 	)
 
 	app.mm.RegisterInvariants(&app.CrisisKeeper)
@@ -483,7 +479,6 @@ func NewSimApp(
 	// NOTE: the IBC mock keeper and application module is used only for testing core IBC. Do
 	// note replicate if you do not need to test core IBC or light clients.
 	app.ScopedIBCMockKeeper = scopedIBCMockKeeper
-	app.ScopedIbcGammKeeper = scopedIbcGammKeeper
 
 	return app
 }
