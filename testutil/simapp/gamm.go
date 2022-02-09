@@ -5,7 +5,6 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
-	ibcgammkeeper "github.com/disperze/ibc-osmo/x/intergamm/keeper"
 	ibcgammtypes "github.com/disperze/ibc-osmo/x/intergamm/types"
 )
 
@@ -53,7 +52,7 @@ func (s SwapKeeperTest) JoinSwapExternAmountIn(
 	shareOutMinAmount sdk.Int,
 ) (shareOutAmount sdk.Int, err error) {
 
-	tokenOutDenom := ibcgammkeeper.GetPoolShareDenom(poolId)
+	tokenOutDenom := ibcgammtypes.GetPoolShareDenom(poolId)
 	shareOutAmount = shareOutMinAmount
 	tokenOut := sdk.NewCoin(tokenOutDenom, shareOutAmount)
 	err = s.ReceiveAndMintTokens(ctx, sender, tokenIn, tokenOut)

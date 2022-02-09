@@ -1,8 +1,6 @@
 package keeper
 
 import (
-	"fmt"
-
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	clienttypes "github.com/cosmos/ibc-go/v2/modules/core/02-client/types"
 	channeltypes "github.com/cosmos/ibc-go/v2/modules/core/04-channel/types"
@@ -26,7 +24,7 @@ func (k Keeper) OnRecvJoinPoolPacket(ctx sdk.Context, packet channeltypes.Packet
 	}
 
 	// Send tokens output to source chain
-	tokenOutDenom := GetPoolShareDenom(data.PoolId)
+	tokenOutDenom := types.GetPoolShareDenom(data.PoolId)
 	tokenTransferOut := sdk.NewCoin(tokenOutDenom, tokenOutAmount)
 	// transferKeeper needs ICS4Wrapper
 	err = k.transferKeeper.SendTransfer(ctx, packet.GetDestPort(), packet.GetDestChannel(), tokenTransferOut, sender, data.Sender, clienttypes.ZeroHeight(), 0)
@@ -43,8 +41,4 @@ func (k Keeper) OnRecvJoinPoolPacket(ctx sdk.Context, packet channeltypes.Packet
 	packetAck.Denom = denomPathOut
 
 	return packetAck, nil
-}
-
-func GetPoolShareDenom(poolId uint64) string {
-	return fmt.Sprintf("gamm/pool/%d", poolId)
 }
